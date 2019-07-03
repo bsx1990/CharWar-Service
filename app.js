@@ -18,6 +18,7 @@ IO.on("connection", function(msgResponse) {
     initDefaultPlaygroundCards();
     emitPlaygroundCardsChanged();
 
+    candidateCards = [];
     appendCandidateCard();
     appendCandidateCard();
     emitCandidateCardsChanged();
