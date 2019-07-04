@@ -5,6 +5,8 @@ const config = require("./config/game-config");
 let playgroundCards = [];
 let candidateCards = [];
 let socket;
+let score = 0;
+let bestScore = 0;
 
 app.listen(config.PORT);
 
@@ -22,6 +24,12 @@ IO.on("connection", function(msgResponse) {
     appendCandidateCard();
     appendCandidateCard();
     emitCandidateCardsChanged();
+
+    score = 0;
+    emitScoreChanged();
+
+    bestScore = 0;
+    emitBestScoreChanged();
   });
 
   msgResponse.on(config.requestType.clickCard, (rowIndex, columnIndex) => {
@@ -36,6 +44,16 @@ function emitCandidateCardsChanged() {
 
 function emitPlaygroundCardsChanged() {
   socket.emit(config.responseType.playgroundCardsChanged, playgroundCards);
+}
+
+function emitScoreChanged() {
+  console.log(`send score changed event, current score: ${score}`);
+  socket.emit(config.responseType.scoreChanged, score);
+}
+
+function emitBestScoreChanged() {
+  console.log(`send best score changed event, current best score: ${bestScore}`);
+  socket.emit(config.responseType.bestScoreChanged, bestScore);
 }
 
 function initDefaultPlaygroundCards() {
@@ -78,8 +96,18 @@ function clickCard(rowIndex, columnIndex) {
 
   let combinedCardsIndexs = getSameCardsFromAround(rowIndex, columnIndex);
   while (combinedCardsIndexs.length > 0) {
+    let combinedScore = sumCombinedCards(combinedCardsIndexs);
+    score += combinedScore;
+    emitScoreChanged();
+
+    if (score > bestScore) {
+      bestScore = score;
+      emitBestScoreChanged();
+    }
+
     combineCards(combinedCardsIndexs, rowIndex, columnIndex);
     emitPlaygroundCardsChanged();
+
     combinedCardsIndexs = getSameCardsFromAround(rowIndex, columnIndex);
   }
 }
@@ -118,6 +146,14 @@ function getSameCardsFromAround(rowIndex, columnIndex) {
 
 function isOutofPlaygroundRange(index) {
   return config.PLAYGROUND_SIZE <= index || index < 0;
+}
+
+function sumCombinedCards(combinedCardsIndexs) {
+  let result = 0;
+  combinedCardsIndexs.forEach(index => {
+    result += playgroundCards[index[0]][index[1]];
+  });
+  return result;
 }
 
 function combineCards(combinedCardsIndexs, rowIndex, columnIndex) {

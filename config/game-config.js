@@ -5,7 +5,9 @@ exports.requestType = {
 
 exports.responseType = {
   playgroundCardsChanged: "playgroundCardsChanged",
-  candidateCardsChanged: "CandidateCardsChanged"
+  candidateCardsChanged: "CandidateCardsChanged",
+  scoreChanged: "ScoreChanged",
+  bestScoreChanged: "BestScoreChanged"
 };
 
 exports.PORT = 1001;
