@@ -1,73 +1,59 @@
-const app = require("http").createServer();
-const IO = require("socket.io")(app);
-const config = require("./config/game-config");
+const APP = require("http").createServer();
+const IO = require("socket.io")(APP);
+const CONFIG = require("./config/game-config");
+
+const PLAYGROUND_CARDS_CHANGED = CONFIG.responseType.playgroundCardsChanged;
+const CANDIDATE_CARDS_CHANGED = CONFIG.responseType.candidateCardsChanged;
+const SCORE_CHANGED = CONFIG.responseType.scoreChanged;
+const BEST_SCORE_CHANGED = CONFIG.responseType.bestScoreChanged;
+const CLICK_CARD = CONFIG.requestType.clickCard;
 
 let requestMapping = new Map();
 
-app.listen(config.PORT);
+APP.listen(CONFIG.PORT);
 
 IO.on("connection", function(socket) {
   console.log(`received connection request, request id: ${socket.id}`);
 
-  let gameDatas = { playgroundCards: [], candidateCards: [], score: 0, bestScore: 0 };
+  let gameDatas = { playgroundCards: getDefaultPlaygroundCards(), candidateCards: [], score: 0, bestScore: 0 };
   requestMapping.set(socket.id, gameDatas);
 
-  socket.on(config.requestType.getData, () => {
+  socket.on(CONFIG.requestType.getData, () => {
     console.log(`received getData request, request id: ${socket.id}`);
+    const dataCollection = requestMapping.get(socket.id);
+    const playgroundCards = dataCollection.playgroundCards;
+    const candidateCards = dataCollection.candidateCards;
+    const score = dataCollection.score;
+    const bestScore = dataCollection.bestScore;
 
-    initDefaultPlaygroundCards(socket.id);
-    emitPlaygroundCardsChanged(socket);
+    appendCandidateCard(playgroundCards, candidateCards);
+    appendCandidateCard(playgroundCards, candidateCards);
 
-    requestMapping.get(socket.id).candidateCards = [];
-    appendCandidateCard(socket.id);
-    appendCandidateCard(socket.id);
-    emitCandidateCardsChanged(socket);
-
-    requestMapping.get(socket.id).score = 0;
-    emitScoreChanged(socket);
-
-    requestMapping.get(socket.id).bestScore = 0;
-    emitBestScoreChanged(socket);
+    socket.emit(PLAYGROUND_CARDS_CHANGED, playgroundCards);
+    socket.emit(CANDIDATE_CARDS_CHANGED, candidateCards);
+    socket.emit(SCORE_CHANGED, score);
+    socket.emit(BEST_SCORE_CHANGED, bestScore);
   });
 
-  socket.on(config.requestType.clickCard, (rowIndex, columnIndex) => {
+  socket.on(CLICK_CARD, (rowIndex, columnIndex) => {
     console.log(`received clickCard request, rowIndex:${rowIndex} columnIndex:${columnIndex}`);
     clickCard(socket, rowIndex, columnIndex);
   });
 });
 
-function emitCandidateCardsChanged(socket) {
-  socket.emit(config.responseType.candidateCardsChanged, requestMapping.get(socket.id).candidateCards);
-}
-
-function emitPlaygroundCardsChanged(socket) {
-  socket.emit(config.responseType.playgroundCardsChanged, requestMapping.get(socket.id).playgroundCards);
-}
-
-function emitScoreChanged(socket) {
-  console.log(`send score changed event, current score: ${requestMapping.get(socket.id).score}`);
-  socket.emit(config.responseType.scoreChanged, requestMapping.get(socket.id).score);
-}
-
-function emitBestScoreChanged(socket) {
-  console.log(`send best score changed event, current best score: ${requestMapping.get(socket.id).bestScore}`);
-  socket.emit(config.responseType.bestScoreChanged, requestMapping.get(socket.id).bestScore);
-}
-
-function initDefaultPlaygroundCards(socketId) {
-  let playgroundCards = requestMapping.get(socketId).playgroundCards;
-
-  for (let row = 0; row < config.PLAYGROUND_SIZE; row++) {
+function getDefaultPlaygroundCards() {
+  let playgroundCards = [];
+  for (let row = 0; row < CONFIG.PLAYGROUND_SIZE; row++) {
     playgroundCards[row] = [];
-    for (let column = 0; column < config.PLAYGROUND_SIZE; column++) {
+    for (let column = 0; column < CONFIG.PLAYGROUND_SIZE; column++) {
       playgroundCards[row][column] = null;
     }
   }
+  return playgroundCards;
 }
 
-function appendCandidateCard(socketId) {
-  let playgroundCards = requestMapping.get(socketId).playgroundCards;
-  requestMapping.get(socketId).candidateCards.push(generateCard(playgroundCards));
+function appendCandidateCard(playgroundCards, candidateCards) {
+  candidateCards.push(generateCard(playgroundCards));
 }
 
 function generateCard(playgroundCards) {
@@ -76,8 +62,8 @@ function generateCard(playgroundCards) {
     maxCard = 0;
   }
 
-  if (maxCard > config.MAX_GENERATED_CARD) {
-    maxCard = config.MAX_GENERATED_CARD;
+  if (maxCard > CONFIG.MAX_GENERATED_CARD) {
+    maxCard = CONFIG.MAX_GENERATED_CARD;
   }
 
   return Math.trunc(Math.random() * maxCard + 1);
@@ -86,31 +72,32 @@ function generateCard(playgroundCards) {
 function clickCard(socket, rowIndex, columnIndex) {
   let socketId = socket.id;
   let playgroundCards = requestMapping.get(socketId).playgroundCards;
+  let candidateCards = requestMapping.get(socketId).candidateCards;
 
   if (playgroundCards[rowIndex][columnIndex] != null) {
     return;
   }
 
-  let currentCandidateCard = requestMapping.get(socketId).candidateCards.shift();
-  appendCandidateCard(socketId);
-  emitCandidateCardsChanged(socket);
+  let currentCandidateCard = candidateCards.shift();
+  appendCandidateCard(playgroundCards, candidateCards);
+  socket.emit(CANDIDATE_CARDS_CHANGED, candidateCards);
 
   playgroundCards[rowIndex][columnIndex] = currentCandidateCard;
-  emitPlaygroundCardsChanged(socket);
+  socket.emit(PLAYGROUND_CARDS_CHANGED, playgroundCards);
 
   let combinedCardsIndexs = getSameCardsFromAround(playgroundCards, rowIndex, columnIndex);
   while (combinedCardsIndexs.length > 0) {
     let combinedScore = sumCombinedCards(playgroundCards, combinedCardsIndexs);
     requestMapping.get(socketId).score += combinedScore;
-    emitScoreChanged(socket);
+    socket.emit(SCORE_CHANGED, requestMapping.get(socketId).score);
 
     if (requestMapping.get(socketId).score > requestMapping.get(socketId).bestScore) {
       requestMapping.get(socketId).bestScore = requestMapping.get(socketId).score;
-      emitBestScoreChanged(socket);
+      socket.emit(BEST_SCORE_CHANGED, requestMapping.get(socketId).bestScore);
     }
 
     combineCards(playgroundCards, combinedCardsIndexs, rowIndex, columnIndex);
-    emitPlaygroundCardsChanged(socket);
+    socket.emit(PLAYGROUND_CARDS_CHANGED, playgroundCards);
 
     combinedCardsIndexs = getSameCardsFromAround(playgroundCards, rowIndex, columnIndex);
   }
@@ -121,14 +108,14 @@ function getSameCardsFromAround(playgroundCards, rowIndex, columnIndex) {
   let result = [];
 
   const arrows = [
-    config.ARROW.LEFT_UP,
-    config.ARROW.UP,
-    config.ARROW.RIGHT_UP,
-    config.ARROW.LEFT,
-    config.ARROW.RIGHT,
-    config.ARROW.LEFT_DOWN,
-    config.ARROW.DOWN,
-    config.ARROW.RIGHT_DOWN
+    CONFIG.ARROW.LEFT_UP,
+    CONFIG.ARROW.UP,
+    CONFIG.ARROW.RIGHT_UP,
+    CONFIG.ARROW.LEFT,
+    CONFIG.ARROW.RIGHT,
+    CONFIG.ARROW.LEFT_DOWN,
+    CONFIG.ARROW.DOWN,
+    CONFIG.ARROW.RIGHT_DOWN
   ];
   arrows.forEach(arrow => {
     const columnOffset = arrow[0];
@@ -149,7 +136,7 @@ function getSameCardsFromAround(playgroundCards, rowIndex, columnIndex) {
 }
 
 function isOutofPlaygroundRange(index) {
-  return config.PLAYGROUND_SIZE <= index || index < 0;
+  return CONFIG.PLAYGROUND_SIZE <= index || index < 0;
 }
 
 function sumCombinedCards(playgroundCards, combinedCardsIndexs) {
@@ -168,4 +155,4 @@ function combineCards(playgroundCards, combinedCardsIndexs, rowIndex, columnInde
   playgroundCards[rowIndex][columnIndex] = playgroundCards[rowIndex][columnIndex] + 1;
 }
 
-console.log("app listen at:" + config.PORT);
+console.log("app listen at:" + CONFIG.PORT);
