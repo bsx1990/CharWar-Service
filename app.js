@@ -1,6 +1,6 @@
-const APP = require("http").createServer();
-const IO = require("socket.io")(APP);
-const CONFIG = require("./config/game-config");
+const APP = require('http').createServer();
+const IO = require('socket.io')(APP);
+const CONFIG = require('./config/game-config');
 
 const PLAYGROUND_CARDS_CHANGED = CONFIG.responseType.playgroundCardsChanged;
 const CANDIDATE_CARDS_CHANGED = CONFIG.responseType.candidateCardsChanged;
@@ -12,22 +12,23 @@ let requestMapping = new Map();
 
 APP.listen(CONFIG.PORT);
 
-IO.on("connection", function(socket) {
-  console.log(`received connection request, request id: ${socket.id}`);
+IO.on('connection', function(socket) {
+  console.log(`received connection request, request id: ${socket.id}, token is:${socket.handshake.query.token}`);
 
-  let gameDatas = { playgroundCards: getDefaultPlaygroundCards(), candidateCards: [], score: 0, bestScore: 0 };
-  requestMapping.set(socket.id, gameDatas);
+  if (!requestMapping.has(socket.handshake.query.token)) {
+    const gameDatas = { playgroundCards: getDefaultPlaygroundCards(), candidateCards: [], score: 0, bestScore: 0 };
+    appendCandidateCard(gameDatas.playgroundCards, gameDatas.candidateCards);
+    appendCandidateCard(gameDatas.playgroundCards, gameDatas.candidateCards);
+    requestMapping.set(socket.handshake.query.token, gameDatas);
+  }
 
   socket.on(CONFIG.requestType.getData, () => {
-    console.log(`received getData request, request id: ${socket.id}`);
-    const dataCollection = requestMapping.get(socket.id);
+    console.log(`received getData request, request id: ${socket.id}, token is:${socket.handshake.query.token}`);
+    const dataCollection = requestMapping.get(socket.handshake.query.token);
     const playgroundCards = dataCollection.playgroundCards;
     const candidateCards = dataCollection.candidateCards;
     const score = dataCollection.score;
     const bestScore = dataCollection.bestScore;
-
-    appendCandidateCard(playgroundCards, candidateCards);
-    appendCandidateCard(playgroundCards, candidateCards);
 
     socket.emit(PLAYGROUND_CARDS_CHANGED, playgroundCards);
     socket.emit(CANDIDATE_CARDS_CHANGED, candidateCards);
@@ -36,7 +37,7 @@ IO.on("connection", function(socket) {
   });
 
   socket.on(CLICK_CARD, (rowIndex, columnIndex) => {
-    console.log(`received clickCard request, rowIndex:${rowIndex} columnIndex:${columnIndex}`);
+    console.log(`received clickCard request from token is:${socket.handshake.query.token}, rowIndex:${rowIndex} columnIndex:${columnIndex}`);
     clickCard(socket, rowIndex, columnIndex);
   });
 });
@@ -70,15 +71,16 @@ function generateCard(playgroundCards) {
 }
 
 function clickCard(socket, rowIndex, columnIndex) {
-  let socketId = socket.id;
-  let playgroundCards = requestMapping.get(socketId).playgroundCards;
-  let candidateCards = requestMapping.get(socketId).candidateCards;
+  let token = socket.handshake.query.token;
+  let playgroundCards = requestMapping.get(token).playgroundCards;
+  let candidateCards = requestMapping.get(token).candidateCards;
 
   if (playgroundCards[rowIndex][columnIndex] != null) {
     return;
   }
 
   let currentCandidateCard = candidateCards.shift();
+
   appendCandidateCard(playgroundCards, candidateCards);
   socket.emit(CANDIDATE_CARDS_CHANGED, candidateCards);
 
@@ -88,12 +90,12 @@ function clickCard(socket, rowIndex, columnIndex) {
   let combinedCardsIndexs = getSameCardsFromAround(playgroundCards, rowIndex, columnIndex);
   while (combinedCardsIndexs.length > 0) {
     let combinedScore = sumCombinedCards(playgroundCards, combinedCardsIndexs);
-    requestMapping.get(socketId).score += combinedScore;
-    socket.emit(SCORE_CHANGED, requestMapping.get(socketId).score);
+    requestMapping.get(token).score += combinedScore;
+    socket.emit(SCORE_CHANGED, requestMapping.get(token).score);
 
-    if (requestMapping.get(socketId).score > requestMapping.get(socketId).bestScore) {
-      requestMapping.get(socketId).bestScore = requestMapping.get(socketId).score;
-      socket.emit(BEST_SCORE_CHANGED, requestMapping.get(socketId).bestScore);
+    if (requestMapping.get(token).score > requestMapping.get(token).bestScore) {
+      requestMapping.get(token).bestScore = requestMapping.get(token).score;
+      socket.emit(BEST_SCORE_CHANGED, requestMapping.get(token).bestScore);
     }
 
     combineCards(playgroundCards, combinedCardsIndexs, rowIndex, columnIndex);
@@ -155,4 +157,4 @@ function combineCards(playgroundCards, combinedCardsIndexs, rowIndex, columnInde
   playgroundCards[rowIndex][columnIndex] = playgroundCards[rowIndex][columnIndex] + 1;
 }
 
-console.log("app listen at:" + CONFIG.PORT);
+console.log('app listen at:' + CONFIG.PORT);
