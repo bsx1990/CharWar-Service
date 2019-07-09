@@ -9,6 +9,7 @@ const PLAYGROUND_CARDS_CHANGED = CONFIG.responseType.playgroundCardsChanged;
 const CANDIDATE_CARDS_CHANGED = CONFIG.responseType.candidateCardsChanged;
 const SCORE_CHANGED = CONFIG.responseType.scoreChanged;
 const BEST_SCORE_CHANGED = CONFIG.responseType.bestScoreChanged;
+const GAME_OVER = CONFIG.responseType.gameOver;
 
 function clickCard(socket, rowIndex, columnIndex) {
   const gameDatas = GAME_SYSTEM.getGameDatasByToken(socket.handshake.query.token);
@@ -22,6 +23,8 @@ function clickCard(socket, rowIndex, columnIndex) {
   placeCardsBeforeCombinCards(socket, gameDatas, rowIndex, columnIndex);
 
   combinCardsUntilNoSameCardsAround(socket, gameDatas, rowIndex, columnIndex);
+
+  CheckGameStatusAfterCombined(socket, gameDatas.playgroundCards);
 }
 
 function placeCardsBeforeCombinCards(socket, gameDatas, rowIndex, columnIndex) {
@@ -113,4 +116,12 @@ function combineCards(playgroundCards, combinedCardsIndexs, rowIndex, columnInde
   });
 
   playgroundCards[rowIndex][columnIndex] = playgroundCards[rowIndex][columnIndex] + 1;
+}
+
+function CheckGameStatusAfterCombined(socket, playgroundCards) {
+  const isGameOver = playgroundCards.filter(array => array.includes(undefined) || array.includes(null)).length == 0;
+  if (isGameOver) {
+    console.log(`GAME OVER! request id: ${socket.id}, token is:${socket.handshake.query.token}`);
+    socket.emit(GAME_OVER);
+  }
 }

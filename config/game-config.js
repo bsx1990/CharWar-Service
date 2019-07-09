@@ -1,13 +1,14 @@
 exports.requestType = {
-  getData: "getData",
-  clickCard: "clickCard"
+  getData: 'getData',
+  clickCard: 'clickCard'
 };
 
 exports.responseType = {
-  playgroundCardsChanged: "playgroundCardsChanged",
-  candidateCardsChanged: "CandidateCardsChanged",
-  scoreChanged: "ScoreChanged",
-  bestScoreChanged: "BestScoreChanged"
+  playgroundCardsChanged: 'playgroundCardsChanged',
+  candidateCardsChanged: 'CandidateCardsChanged',
+  scoreChanged: 'ScoreChanged',
+  bestScoreChanged: 'BestScoreChanged',
+  gameOver: 'GameOver'
 };
 
 exports.PORT = 1001;
