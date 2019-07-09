@@ -1,5 +1,6 @@
 module.exports = {
-  clickCard: clickCard
+  clickCard: clickCard,
+  replay: replay
 };
 
 const GAME_SYSTEM = require('./game-system');
@@ -10,6 +11,7 @@ const CANDIDATE_CARDS_CHANGED = CONFIG.responseType.candidateCardsChanged;
 const SCORE_CHANGED = CONFIG.responseType.scoreChanged;
 const BEST_SCORE_CHANGED = CONFIG.responseType.bestScoreChanged;
 const GAME_OVER = CONFIG.responseType.gameOver;
+const GAME_START = CONFIG.responseType.gameStart;
 
 function clickCard(socket, rowIndex, columnIndex) {
   const gameDatas = GAME_SYSTEM.getGameDatasByToken(socket.handshake.query.token);
@@ -124,4 +126,9 @@ function CheckGameStatusAfterCombined(socket, playgroundCards) {
     console.log(`GAME OVER! request id: ${socket.id}, token is:${socket.handshake.query.token}`);
     socket.emit(GAME_OVER);
   }
+}
+
+function replay(socket) {
+  GAME_SYSTEM.resetGameDatas(socket);
+  socket.emit(GAME_START);
 }

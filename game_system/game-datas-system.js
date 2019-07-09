@@ -1,11 +1,18 @@
 module.exports = {
   initDatas: initDatas,
   recordTokenToRequestMapping: recordTokenToRequestMapping,
-  getGameDatasByToken: getGameDatasByToken
+  getGameDatasByToken: getGameDatasByToken,
+  resetGameDatas: resetGameDatas,
+  emitGameDatas: emitGameDatas
 };
 
 const GAME_SYSTEM = require('./game-system');
 const CONFIG = require('../config/game-config');
+
+const PLAYGROUND_CARDS_CHANGED = CONFIG.responseType.playgroundCardsChanged;
+const CANDIDATE_CARDS_CHANGED = CONFIG.responseType.candidateCardsChanged;
+const SCORE_CHANGED = CONFIG.responseType.scoreChanged;
+const BEST_SCORE_CHANGED = CONFIG.responseType.bestScoreChanged;
 
 let requestMapping = new Map();
 
@@ -37,4 +44,23 @@ function recordTokenToRequestMapping(token) {
 
 function getGameDatasByToken(token) {
   return requestMapping.get(token);
+}
+
+function resetGameDatas(socket) {
+  let token = socket.handshake.query.token;
+  requestMapping.set(token, GAME_SYSTEM.initDatas());
+  emitGameDatas(socket);
+}
+
+function emitGameDatas(socket) {
+  const gameDatas = GAME_SYSTEM.getGameDatasByToken(socket.handshake.query.token);
+  const playgroundCards = gameDatas.playgroundCards;
+  const candidateCards = gameDatas.candidateCards;
+  const score = gameDatas.score;
+  const bestScore = gameDatas.bestScore;
+
+  socket.emit(PLAYGROUND_CARDS_CHANGED, playgroundCards);
+  socket.emit(CANDIDATE_CARDS_CHANGED, candidateCards);
+  socket.emit(SCORE_CHANGED, score);
+  socket.emit(BEST_SCORE_CHANGED, bestScore);
 }

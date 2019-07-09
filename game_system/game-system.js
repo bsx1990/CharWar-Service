@@ -13,6 +13,15 @@ module.exports = {
   },
   clickCard: (socket, rowIndex, columnIndex) => {
     gameLogicSystem.clickCard(socket, rowIndex, columnIndex);
+  },
+  replay: socket => {
+    gameLogicSystem.replay(socket);
+  },
+  resetGameDatas: socket => {
+    gameDatasSystem.resetGameDatas(socket);
+  },
+  emitGameDatas: socket => {
+    gameDatasSystem.emitGameDatas(socket);
   }
 };
 
