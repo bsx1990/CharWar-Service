@@ -13,12 +13,13 @@ const PLAYGROUND_CARDS_CHANGED = CONFIG.responseType.playgroundCardsChanged;
 const CANDIDATE_CARDS_CHANGED = CONFIG.responseType.candidateCardsChanged;
 const SCORE_CHANGED = CONFIG.responseType.scoreChanged;
 const BEST_SCORE_CHANGED = CONFIG.responseType.bestScoreChanged;
+const GAME_STATE_CHANGED = CONFIG.responseType.gameStateChanged;
 
 let requestMapping = new Map();
 
 //#region initDatas
 function initDatas() {
-  const gameDatas = { playgroundCards: getDefaultPlaygroundCards(), candidateCards: [], score: 0, bestScore: 0 };
+  const gameDatas = { playgroundCards: getDefaultPlaygroundCards(), candidateCards: [], score: 0, bestScore: 0, gameState: '' };
   GAME_SYSTEM.appendCandidateCard(gameDatas.playgroundCards, gameDatas.candidateCards);
   GAME_SYSTEM.appendCandidateCard(gameDatas.playgroundCards, gameDatas.candidateCards);
   return gameDatas;
@@ -58,9 +59,11 @@ function emitGameDatas(socket) {
   const candidateCards = gameDatas.candidateCards;
   const score = gameDatas.score;
   const bestScore = gameDatas.bestScore;
+  const gameState = gameDatas.gameState;
 
   socket.emit(PLAYGROUND_CARDS_CHANGED, playgroundCards);
   socket.emit(CANDIDATE_CARDS_CHANGED, candidateCards);
   socket.emit(SCORE_CHANGED, score);
   socket.emit(BEST_SCORE_CHANGED, bestScore);
+  socket.emit(GAME_STATE_CHANGED, gameState);
 }

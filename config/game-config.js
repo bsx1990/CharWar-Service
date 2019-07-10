@@ -9,8 +9,7 @@ exports.responseType = {
   candidateCardsChanged: 'CandidateCardsChanged',
   scoreChanged: 'ScoreChanged',
   bestScoreChanged: 'BestScoreChanged',
-  gameOver: 'GameOver',
-  gameStart: 'GameStart'
+  gameStateChanged: 'GameStateChanged'
 };
 
 exports.PORT = 1001;
