@@ -1,7 +1,8 @@
 exports.requestType = {
   getData: 'GetData',
   clickCard: 'ClickCard',
-  replay: 'Replay'
+  replay: 'Replay',
+  gameModeChanged: 'GameModeChanged'
 };
 
 exports.responseType = {
@@ -25,4 +26,20 @@ exports.ARROW = {
   LEFT_DOWN: [-1, 1],
   DOWN: [0, 1],
   RIGHT_DOWN: [1, 1]
+};
+
+exports.ALL_AROUND_ARROW = [
+  this.ARROW.LEFT_UP,
+  this.ARROW.UP,
+  this.ARROW.RIGHT_UP,
+  this.ARROW.LEFT,
+  this.ARROW.RIGHT,
+  this.ARROW.LEFT_DOWN,
+  this.ARROW.DOWN,
+  this.ARROW.RIGHT_DOWN
+];
+
+exports.gameModes = {
+  peace: 'Peace',
+  war: 'War'
 };

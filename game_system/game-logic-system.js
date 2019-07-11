@@ -4,13 +4,14 @@ module.exports = {
 };
 
 const GAME_SYSTEM = require('./game-system');
-const CONFIG = require('../config/game-config');
 
-const PLAYGROUND_CARDS_CHANGED = CONFIG.responseType.playgroundCardsChanged;
-const CANDIDATE_CARDS_CHANGED = CONFIG.responseType.candidateCardsChanged;
-const SCORE_CHANGED = CONFIG.responseType.scoreChanged;
-const BEST_SCORE_CHANGED = CONFIG.responseType.bestScoreChanged;
-const GAME_STATE_CHANGED = CONFIG.responseType.gameStateChanged;
+const PLAYGROUND_CARDS_CHANGED = GAME_SYSTEM.PLAYGROUND_CARDS_CHANGED;
+const CANDIDATE_CARDS_CHANGED = GAME_SYSTEM.CANDIDATE_CARDS_CHANGED;
+const SCORE_CHANGED = GAME_SYSTEM.SCORE_CHANGED;
+const BEST_SCORE_CHANGED = GAME_SYSTEM.BEST_SCORE_CHANGED;
+const GAME_STATE_CHANGED = GAME_SYSTEM.GAME_STATE_CHANGED;
+const ALL_AROUND_ARROW = GAME_SYSTEM.ALL_AROUND_ARROW;
+const PLAYGROUND_SIZE = GAME_SYSTEM.PLAYGROUND_SIZE;
 
 function clickCard(socket, rowIndex, columnIndex) {
   const gameDatas = GAME_SYSTEM.getGameDatasByToken(socket.handshake.query.token);
@@ -70,18 +71,7 @@ function getSameCardsFromAround(playgroundCards, rowIndex, columnIndex) {
   const centerCard = playgroundCards[rowIndex][columnIndex];
   let result = [];
 
-  const arrows = [
-    CONFIG.ARROW.LEFT_UP,
-    CONFIG.ARROW.UP,
-    CONFIG.ARROW.RIGHT_UP,
-    CONFIG.ARROW.LEFT,
-    CONFIG.ARROW.RIGHT,
-    CONFIG.ARROW.LEFT_DOWN,
-    CONFIG.ARROW.DOWN,
-    CONFIG.ARROW.RIGHT_DOWN
-  ];
-
-  arrows.forEach(arrow => {
+  ALL_AROUND_ARROW.forEach(arrow => {
     const columnOffset = arrow[0];
     const rowOffset = arrow[1];
     const targetRowIndex = rowIndex + rowOffset;
@@ -100,7 +90,7 @@ function getSameCardsFromAround(playgroundCards, rowIndex, columnIndex) {
 }
 
 function isOutofPlaygroundRange(index) {
-  return CONFIG.PLAYGROUND_SIZE <= index || index < 0;
+  return PLAYGROUND_SIZE <= index || index < 0;
 }
 
 function sumCombinedCards(playgroundCards, combinedCardsIndexs) {
