@@ -1,4 +1,20 @@
+const GAME_SYSTEM = require('../game-system');
+const MAX_GENERATED_CARD = GAME_SYSTEM.MAX_GENERATED_CARD;
+
 module.exports = {
+  MAX_GENERATED_CARD,
+
+  getMaxCardValue: numberCardsMap => {
+    return numberCardsSystem.getMaxCardValue(numberCardsMap);
+  },
+  appendRandomCandidateCard: (numberCardsMap, candidateCards) => {
+    const currentMaxCardValue = numberCardsSystem.getMaxCardValue(numberCardsMap);
+    candidateCardsSystem.appendRandomCandidateCard(candidateCards, currentMaxCardValue);
+  },
+  generateRandomValue: (minValue, maxValue) => {
+    return Math.trunc(Math.random() * maxValue + minValue);
+  },
+
   initDatas: initDatas,
   recordTokenToRequestMapping: recordTokenToRequestMapping,
   getGameDatasByToken: getGameDatasByToken,
@@ -12,7 +28,8 @@ module.exports = {
   increaseNumberCardValue: increaseNumberCardValue
 };
 
-const GAME_SYSTEM = require('./game-system');
+let candidateCardsSystem = require('./candidate-cards-system');
+let numberCardsSystem = require('./number-cards-system');
 
 const PLAYGROUND_CARDS_CHANGED = GAME_SYSTEM.PLAYGROUND_CARDS_CHANGED;
 const CANDIDATE_CARDS_CHANGED = GAME_SYSTEM.CANDIDATE_CARDS_CHANGED;
@@ -40,8 +57,8 @@ function initDatas() {
     bestScore: 0,
     gameState: ''
   };
-  GAME_SYSTEM.appendCandidateCard(gameDatas.playgroundCards, gameDatas.candidateCards);
-  GAME_SYSTEM.appendCandidateCard(gameDatas.playgroundCards, gameDatas.candidateCards);
+  GAME_SYSTEM.appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
+  GAME_SYSTEM.appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
   return gameDatas;
 }
 

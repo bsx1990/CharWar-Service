@@ -37,7 +37,7 @@ function placeCardsBeforeCombinCards(socket, gameDatas, currentCard, token) {
 }
 
 function generateNewCandidateCardsAndEmitChange(socket, gameDatas) {
-  GAME_SYSTEM.appendCandidateCard(gameDatas.playgroundCards, gameDatas.candidateCards);
+  GAME_SYSTEM.appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
   socket.emit(CANDIDATE_CARDS_CHANGED, gameDatas.candidateCards);
 }
 

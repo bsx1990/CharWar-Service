@@ -33,8 +33,8 @@ module.exports = {
   initDatas: () => {
     return gameDatasSystem.initDatas();
   },
-  appendCandidateCard: (playgroundCards, candidateCards) => {
-    candidateCardSystem.appendCandidateCard(playgroundCards, candidateCards);
+  appendRandomCandidateCard: (numberCardsMap, candidateCards) => {
+    gameDatasSystem.appendRandomCandidateCard(numberCardsMap, candidateCards);
   },
   recordTokenToRequestMapping: token => {
     gameDatasSystem.recordTokenToRequestMapping(token);
@@ -77,6 +77,5 @@ module.exports = {
   }
 };
 
-let candidateCardSystem = require('./candidate-card-system');
-let gameDatasSystem = require('./game-datas-system');
+let gameDatasSystem = require('./game_datas_system/game-datas-system');
 let gameLogicSystem = require('./game-logic-system');
