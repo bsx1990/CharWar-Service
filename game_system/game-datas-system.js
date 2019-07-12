@@ -4,7 +4,12 @@ module.exports = {
   getGameDatasByToken: getGameDatasByToken,
   resetGameDatas: resetGameDatas,
   emitGameDatas: emitGameDatas,
-  setCurrentGameMode: setCurrentGameMode
+  setCurrentGameMode: setCurrentGameMode,
+  getGameModeByToken: getGameModeByToken,
+  getCardKeyByRowAndColumn: getCardKeyByRowAndColumn,
+  createCard: createCard,
+  setNumberCard: setNumberCard,
+  increaseNumberCardValue: increaseNumberCardValue
 };
 
 const GAME_SYSTEM = require('./game-system');
@@ -22,13 +27,71 @@ let tokenAndGameModeMapping = new Map();
 
 //#region initDatas
 function initDatas() {
-  const gameDatas = { playgroundCards: getDefaultPlaygroundCards(), candidateCards: [], score: 0, bestScore: 0, gameState: '' };
+  const defaultNumerCardsMap = getDefaultNumberCardsMap();
+  const defaultCharCardsMap = getDefaultCharCardsMap();
+  const defaultEmptyCardsMap = getDefaultEmptyCardsMap();
+  const gameDatas = {
+    numberCardsMap: defaultNumerCardsMap,
+    charCardsMap: defaultCharCardsMap,
+    emptyCardsMap: defaultEmptyCardsMap,
+    playgroundCards: getPlaygroundCards(defaultNumerCardsMap, defaultCharCardsMap, defaultEmptyCardsMap),
+    candidateCards: [],
+    score: 0,
+    bestScore: 0,
+    gameState: ''
+  };
   GAME_SYSTEM.appendCandidateCard(gameDatas.playgroundCards, gameDatas.candidateCards);
   GAME_SYSTEM.appendCandidateCard(gameDatas.playgroundCards, gameDatas.candidateCards);
   return gameDatas;
 }
 
-function getDefaultPlaygroundCards() {
+function getDefaultNumberCardsMap() {
+  return new Map();
+}
+
+function getDefaultCharCardsMap() {
+  return new Map();
+}
+
+function getDefaultEmptyCardsMap() {
+  let emptyCardsMap = new Map();
+  for (let row = 0; row < PLAYGROUND_SIZE; row++) {
+    for (let column = 0; column < PLAYGROUND_SIZE; column++) {
+      const card = createCard(row, column, null);
+      emptyCardsMap.set(card.key, card);
+    }
+  }
+  return emptyCardsMap;
+}
+
+function createCard(rowIndex, columnIndex, value) {
+  return {
+    row: rowIndex,
+    column: columnIndex,
+    key: getCardKeyByRowAndColumn(rowIndex, columnIndex),
+    value: value
+  };
+}
+
+function getCardKeyByRowAndColumn(row, column) {
+  return `${row}/${column}`;
+}
+
+function getPlaygroundCards(numberCardsMap, charCardsMap, emptyCardsMap) {
+  let playgroundCards = getEmptyPlaygroundCards();
+  numberCardsMap.forEach(card => {
+    updatePlaygroundCardsByCard(playgroundCards, card);
+  });
+  charCardsMap.forEach(card => {
+    updatePlaygroundCardsByCard(playgroundCards, card);
+  });
+  emptyCardsMap.forEach(card => {
+    updatePlaygroundCardsByCard(playgroundCards, card);
+  });
+  return playgroundCards;
+}
+
+function getEmptyPlaygroundCards() {
   let playgroundCards = [];
   for (let row = 0; row < PLAYGROUND_SIZE; row++) {
     playgroundCards[row] = [];
@@ -38,6 +101,7 @@ function getDefaultPlaygroundCards() {
   }
   return playgroundCards;
 }
+
 //#endregion
 
 function recordTokenToRequestMapping(token) {
@@ -94,4 +158,48 @@ function getGameModeByToken(token) {
 
 function getIdentifyByToken(token) {
   return `${token}=>${getGameModeByToken(token)}`;
+}
+
+function setNumberCard(token, card) {
+  let gameDatas = getGameDatasByToken(token);
+  let numberCardsMap = gameDatas.numberCardsMap;
+  let emptyCardsMap = gameDatas.emptyCardsMap;
+  let playgroundCards = gameDatas.playgroundCards;
+
+  numberCardsMap.set(card.key, card);
+  if (card.value == undefined || card.value == null) {
+    addToEmptyCardsMap(emptyCardsMap, card);
+  } else {
+    removeFromEmptyCardsMap(emptyCardsMap, card);
+  }
+  updatePlaygroundCardsByCard(playgroundCards, card);
+}
+
+function removeFromEmptyCardsMap(emptyCardsMap, card) {
+  emptyCardsMap.delete(card.key);
+}
+
+function addToEmptyCardsMap(emptyCardsMap, card) {
+  emptyCardsMap.set(card.key, card);
+}
+
+function updatePlaygroundCardsByCard(playgroundCards, card) {
+  playgroundCards[card.row][card.column] = card.value;
+}
+
+function increaseNumberCardValue(token, rowIndex, columnIndex) {
+  const gameDatas = getGameDatasByToken(token);
+  let numberCardsMap = gameDatas.numberCardsMap;
+  let playgroundCards = gameDatas.playgroundCards;
+  const cardKey = getCardKeyByRowAndColumn(rowIndex, columnIndex);
+
+  if (!numberCardsMap.has(cardKey)) {
+    console.log(`token:${token} doesn't have card ${cardKey}`);
+    return;
+  }
+
+  let card = numberCardsMap.get(cardKey);
+  card.value = card.value + 1;
+  numberCardsMap.set(card.key, card);
+  updatePlaygroundCardsByCard(playgroundCards, card);
 }

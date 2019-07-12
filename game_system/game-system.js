@@ -59,6 +59,21 @@ module.exports = {
   },
   getTokenBySocket: socket => {
     return socket.handshake.query.token;
+  },
+  getGameModeByToken: token => {
+    return gameDatasSystem.getGameModeByToken(token);
+  },
+  getCardKeyByRowAndColumn: (rowIndex, columnIndex) => {
+    return gameDatasSystem.getCardKeyByRowAndColumn(rowIndex, columnIndex);
+  },
+  createCard: (rowIndex, columnIndex, value) => {
+    return gameDatasSystem.createCard(rowIndex, columnIndex, value);
+  },
+  setNumberCard: (token, card) => {
+    gameDatasSystem.setNumberCard(token, card);
+  },
+  increaseNumberCardValue: (token, rowIndex, columnIndex) => {
+    gameDatasSystem.increaseNumberCardValue(token, rowIndex, columnIndex);
   }
 };
 
