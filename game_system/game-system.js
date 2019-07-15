@@ -13,6 +13,10 @@ const CLICK_CARD = CONFIG.requestType.clickCard;
 const REPLAY = CONFIG.requestType.replay;
 const GAME_MODE_CHANGED = CONFIG.requestType.gameModeChanged;
 const PORT = CONFIG.PORT;
+const EACH_CHAR_CARD_GENERATE_RATE = CONFIG.eachCharCardGenerateRate;
+const CHAR_CARD_TYPE = CONFIG.charCardType;
+const CHAR_CARDS_GENERATE_RATE = CONFIG.CHAR_CARDS_GENERATE_RATE;
+const MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD = CONFIG.MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD;
 
 module.exports = {
   GAME_MODES,
@@ -29,6 +33,10 @@ module.exports = {
   REPLAY,
   GAME_MODE_CHANGED,
   PORT,
+  EACH_CHAR_CARD_GENERATE_RATE: EACH_CHAR_CARD_GENERATE_RATE,
+  CHAR_CARD_TYPE,
+  CHAR_CARDS_GENERATE_RATE,
+  MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD,
 
   initDatas: () => {
     return gameDatasSystem.initDatas();
@@ -74,6 +82,21 @@ module.exports = {
   },
   increaseNumberCardValue: (token, rowIndex, columnIndex) => {
     gameDatasSystem.increaseNumberCardValue(token, rowIndex, columnIndex);
+  },
+  generateRandomValue: (minValue, maxValue) => {
+    return gameDatasSystem.generateRandomValue(minValue, maxValue);
+  },
+  getMaxCardValue: numberCardsMap => {
+    return gameDatasSystem.getMaxCardValue(numberCardsMap);
+  },
+  getRandomEmptyCard: emptyCardsMap => {
+    return gameDatasSystem.getRandomEmptyCard(emptyCardsMap);
+  },
+  getRandomCharValue: () => {
+    return gameDatasSystem.getRandomCharValue();
+  },
+  setCharCard: (token, card) => {
+    gameDatasSystem.setCharCard(token, card);
   }
 };
 

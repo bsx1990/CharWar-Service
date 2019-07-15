@@ -43,3 +43,18 @@ exports.gameModes = {
   peace: 'Peace',
   war: 'War'
 };
+
+exports.CHAR_CARDS_GENERATE_RATE = 20;
+exports.MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD = 5;
+
+exports.eachCharCardGenerateRate = {
+  cardA: 60,
+  cardB: 30,
+  cardC: 10
+};
+
+exports.charCardType = {
+  A: 'A',
+  B: 'B',
+  C: 'C'
+};

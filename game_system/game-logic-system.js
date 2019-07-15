@@ -11,6 +11,8 @@ const SCORE_CHANGED = GAME_SYSTEM.SCORE_CHANGED;
 const BEST_SCORE_CHANGED = GAME_SYSTEM.BEST_SCORE_CHANGED;
 const GAME_STATE_CHANGED = GAME_SYSTEM.GAME_STATE_CHANGED;
 const ALL_AROUND_ARROW = GAME_SYSTEM.ALL_AROUND_ARROW;
+const GAME_MODES = GAME_SYSTEM.GAME_MODES;
+const MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD = GAME_SYSTEM.MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD;
 
 function clickCard(socket, rowIndex, columnIndex) {
   const token = GAME_SYSTEM.getTokenBySocket(socket);
@@ -18,6 +20,8 @@ function clickCard(socket, rowIndex, columnIndex) {
   const gameMode = GAME_SYSTEM.getGameModeByToken(token);
 
   let playgroundCards = gameDatas.playgroundCards;
+  let emptyCardsMap = gameDatas.emptyCardsMap;
+  let numberCardsMap = gameDatas.numberCardsMap;
   const hasCardAtClickedPosition = playgroundCards[rowIndex][columnIndex] != null;
   if (hasCardAtClickedPosition) {
     return;
@@ -28,7 +32,40 @@ function clickCard(socket, rowIndex, columnIndex) {
 
   combinCardsUntilNoSameCardsAround(socket, gameDatas, rowIndex, columnIndex, currentCard);
 
+  let canGenerateCharCard = canGenerateRandomCharCard(gameMode, emptyCardsMap, numberCardsMap);
+  if (canGenerateCharCard) {
+    generateCharCard(emptyCardsMap, socket, gameDatas);
+  }
+
   checkGameStatusAfterCombined(socket, gameDatas);
+}
+
+function generateCharCard(emptyCardsMap, socket, gameDatas) {
+  let card = GAME_SYSTEM.getRandomEmptyCard(emptyCardsMap);
+  card.value = GAME_SYSTEM.getRandomCharValue();
+
+  const token = GAME_SYSTEM.getTokenBySocket(socket);
+  GAME_SYSTEM.setCharCard(token, card);
+  socket.emit(PLAYGROUND_CARDS_CHANGED, gameDatas.playgroundCards);
+}
+
+function canGenerateRandomCharCard(gameMode, emptyCardsMap, numberCardsMap) {
+  const isWarMode = gameMode == GAME_MODES.war;
+  if (!isWarMode) {
+    return false;
+  }
+
+  const hasEmpthCards = emptyCardsMap.size > 0;
+  const maxCard = GAME_SYSTEM.getMaxCardValue(numberCardsMap);
+  const maxCardLargeThanGenerateLimit = maxCard > MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD;
+  let random = GAME_SYSTEM.generateRandomValue(1, 100);
+  const isRandomMatchedGenerateRate = random <= GAME_SYSTEM.CHAR_CARDS_GENERATE_RATE;
+
+  const result = isWarMode && hasEmpthCards && maxCardLargeThanGenerateLimit && isRandomMatchedGenerateRate;
+  console.log(
+    `canGenerateRandomCharCard is ${result}, isWarMode:${isWarMode}, hasEmptyCards:${hasEmpthCards}, maxCardLargeThanGenerateLimit:${maxCardLargeThanGenerateLimit}, isRandomMatchedGenerateRate:${isRandomMatchedGenerateRate}`
+  );
+  return result;
 }
 
 function placeCardsBeforeCombinCards(socket, gameDatas, currentCard, token) {
@@ -112,7 +149,7 @@ function checkGameStatusAfterCombined(socket, gameDatas) {
   const isGameOver = gameDatas.emptyCardsMap.size == 0;
   if (isGameOver) {
     gameDatas.gameState = 'GameOver';
-    console.log(`GAME OVER! request id: ${socket.id}, token is:${socket.handshake.query.token}`);
+    console.log(`GAME OVER! request id: ${socket.id}, token is:${GAME_SYSTEM.getTokenBySocket(socket)}`);
     socket.emit(GAME_STATE_CHANGED, gameDatas.gameState);
   }
 }
