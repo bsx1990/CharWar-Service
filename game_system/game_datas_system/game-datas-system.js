@@ -1,8 +1,16 @@
 const GAME_SYSTEM = require('../game-system');
 const MAX_GENERATED_CARD = GAME_SYSTEM.MAX_GENERATED_CARD;
+const PLAYGROUND_SIZE = GAME_SYSTEM.PLAYGROUND_SIZE;
+const PLAYGROUND_CARDS_CHANGED = GAME_SYSTEM.PLAYGROUND_CARDS_CHANGED;
+const CANDIDATE_CARDS_CHANGED = GAME_SYSTEM.CANDIDATE_CARDS_CHANGED;
+const SCORE_CHANGED = GAME_SYSTEM.SCORE_CHANGED;
+const BEST_SCORE_CHANGED = GAME_SYSTEM.BEST_SCORE_CHANGED;
+const GAME_STATE_CHANGED = GAME_SYSTEM.GAME_STATE_CHANGED;
+const GAME_MODES = GAME_SYSTEM.GAME_MODES;
 
 module.exports = {
   MAX_GENERATED_CARD,
+  PLAYGROUND_SIZE,
 
   getMaxCardValue: numberCardsMap => {
     return numberCardsSystem.getMaxCardValue(numberCardsMap);
@@ -30,28 +38,22 @@ module.exports = {
 
 let candidateCardsSystem = require('./candidate-cards-system');
 let numberCardsSystem = require('./number-cards-system');
-
-const PLAYGROUND_CARDS_CHANGED = GAME_SYSTEM.PLAYGROUND_CARDS_CHANGED;
-const CANDIDATE_CARDS_CHANGED = GAME_SYSTEM.CANDIDATE_CARDS_CHANGED;
-const SCORE_CHANGED = GAME_SYSTEM.SCORE_CHANGED;
-const BEST_SCORE_CHANGED = GAME_SYSTEM.BEST_SCORE_CHANGED;
-const GAME_STATE_CHANGED = GAME_SYSTEM.GAME_STATE_CHANGED;
-const GAME_MODES = GAME_SYSTEM.GAME_MODES;
-const PLAYGROUND_SIZE = GAME_SYSTEM.PLAYGROUND_SIZE;
+let emptyCardsSystem = require('./empty-cards-system');
+let charCardsSystem = require('./char-cards-system');
+let playgroundCardsSystem = require('./playground-cards-system');
 
 let identifyAndGameDatasrequestMapping = new Map();
 let tokenAndGameModeMapping = new Map();
 
-//#region initDatas
 function initDatas() {
-  const defaultNumerCardsMap = getDefaultNumberCardsMap();
-  const defaultCharCardsMap = getDefaultCharCardsMap();
-  const defaultEmptyCardsMap = getDefaultEmptyCardsMap();
+  const defaultNumerCardsMap = numberCardsSystem.getDefaultCards();
+  const defaultCharCardsMap = charCardsSystem.getDefaultCards();
+  const defaultEmptyCardsMap = emptyCardsSystem.getDefaultCards();
   const gameDatas = {
     numberCardsMap: defaultNumerCardsMap,
     charCardsMap: defaultCharCardsMap,
     emptyCardsMap: defaultEmptyCardsMap,
-    playgroundCards: getPlaygroundCards(defaultNumerCardsMap, defaultCharCardsMap, defaultEmptyCardsMap),
+    playgroundCards: playgroundCardsSystem.getPlaygroundCards(defaultNumerCardsMap, defaultCharCardsMap, defaultEmptyCardsMap),
     candidateCards: [],
     score: 0,
     bestScore: 0,
@@ -60,25 +62,6 @@ function initDatas() {
   GAME_SYSTEM.appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
   GAME_SYSTEM.appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
   return gameDatas;
-}
-
-function getDefaultNumberCardsMap() {
-  return new Map();
-}
-
-function getDefaultCharCardsMap() {
-  return new Map();
-}
-
-function getDefaultEmptyCardsMap() {
-  let emptyCardsMap = new Map();
-  for (let row = 0; row < PLAYGROUND_SIZE; row++) {
-    for (let column = 0; column < PLAYGROUND_SIZE; column++) {
-      const card = createCard(row, column, null);
-      emptyCardsMap.set(card.key, card);
-    }
-  }
-  return emptyCardsMap;
 }
 
 function createCard(rowIndex, columnIndex, value) {
@@ -93,33 +76,6 @@ function createCard(rowIndex, columnIndex, value) {
 function getCardKeyByRowAndColumn(row, column) {
   return `${row}/${column}`;
 }
-
-function getPlaygroundCards(numberCardsMap, charCardsMap, emptyCardsMap) {
-  let playgroundCards = getEmptyPlaygroundCards();
-  numberCardsMap.forEach(card => {
-    updatePlaygroundCardsByCard(playgroundCards, card);
-  });
-  charCardsMap.forEach(card => {
-    updatePlaygroundCardsByCard(playgroundCards, card);
-  });
-  emptyCardsMap.forEach(card => {
-    updatePlaygroundCardsByCard(playgroundCards, card);
-  });
-  return playgroundCards;
-}
-
-function getEmptyPlaygroundCards() {
-  let playgroundCards = [];
-  for (let row = 0; row < PLAYGROUND_SIZE; row++) {
-    playgroundCards[row] = [];
-    for (let column = 0; column < PLAYGROUND_SIZE; column++) {
-      playgroundCards[row][column] = null;
-    }
-  }
-  return playgroundCards;
-}
-
-//#endregion
 
 function recordTokenToRequestMapping(token) {
   if (token == undefined || token == null) {
@@ -183,25 +139,13 @@ function setNumberCard(token, card) {
   let emptyCardsMap = gameDatas.emptyCardsMap;
   let playgroundCards = gameDatas.playgroundCards;
 
-  numberCardsMap.set(card.key, card);
+  numberCardsSystem.setCard(numberCardsMap, card);
   if (card.value == undefined || card.value == null) {
-    addToEmptyCardsMap(emptyCardsMap, card);
+    emptyCardsSystem.setCard(emptyCardsMap, card);
   } else {
-    removeFromEmptyCardsMap(emptyCardsMap, card);
+    emptyCardsSystem.removeCard(emptyCardsMap, card);
   }
-  updatePlaygroundCardsByCard(playgroundCards, card);
-}
-
-function removeFromEmptyCardsMap(emptyCardsMap, card) {
-  emptyCardsMap.delete(card.key);
-}
-
-function addToEmptyCardsMap(emptyCardsMap, card) {
-  emptyCardsMap.set(card.key, card);
-}
-
-function updatePlaygroundCardsByCard(playgroundCards, card) {
-  playgroundCards[card.row][card.column] = card.value;
+  playgroundCardsSystem.updatePlaygroundCardsByCard(playgroundCards, card);
 }
 
 function increaseNumberCardValue(token, rowIndex, columnIndex) {
@@ -210,13 +154,13 @@ function increaseNumberCardValue(token, rowIndex, columnIndex) {
   let playgroundCards = gameDatas.playgroundCards;
   const cardKey = getCardKeyByRowAndColumn(rowIndex, columnIndex);
 
-  if (!numberCardsMap.has(cardKey)) {
+  let card = numberCardsSystem.getCard(numberCardsMap, cardKey);
+  if (card == null) {
     console.log(`token:${token} doesn't have card ${cardKey}`);
     return;
   }
 
-  let card = numberCardsMap.get(cardKey);
   card.value = card.value + 1;
-  numberCardsMap.set(card.key, card);
-  updatePlaygroundCardsByCard(playgroundCards, card);
+  numberCardsSystem.setCard(numberCardsMap, card);
+  playgroundCardsSystem.updatePlaygroundCardsByCard(playgroundCards, card);
 }
