@@ -97,8 +97,15 @@ module.exports = {
   },
   setCharCard: (token, card) => {
     gameDatasSystem.setCharCard(token, card);
+  },
+  getSumOfCardValues: cards => {
+    return scoreSystem.getSumOfCardValues(cards);
+  },
+  isBestScoreUpdated: gameDatas => {
+    return scoreSystem.isBestScoreUpdated(gameDatas);
   }
 };
 
 let gameDatasSystem = require('./game_datas_system/game-datas-system');
 let gameLogicSystem = require('./game-logic-system');
+let scoreSystem = require('./score-system');

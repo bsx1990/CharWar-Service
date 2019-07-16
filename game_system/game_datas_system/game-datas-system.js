@@ -170,7 +170,7 @@ function increaseNumberCardValue(token, rowIndex, columnIndex) {
   let playgroundCards = gameDatas.playgroundCards;
   const cardKey = getCardKeyByRowAndColumn(rowIndex, columnIndex);
 
-  let card = numberCardsSystem.getCard(numberCardsMap, cardKey);
+  let card = numberCardsMap.get(cardKey);
   if (card == null) {
     console.log(`token:${token} doesn't have card ${cardKey}`);
     return;

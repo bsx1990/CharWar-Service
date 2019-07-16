@@ -1,9 +1,6 @@
 module.exports = {
   getMaxCardValue: getMaxCardValue,
-  getDefaultCards: getDefaultCards,
-  setCard: setCard,
-  getCard: getCard,
-  removeCard: removeCard
+  getDefaultCards: getDefaultCards
 };
 
 function getMaxCardValue(numberCardsMap) {
@@ -31,16 +28,4 @@ function getMaxCardValue(numberCardsMap) {
 
 function getDefaultCards() {
   return new Map();
-}
-
-function setCard(numberCardsMap, card) {
-  numberCardsMap.set(card.key, card);
-}
-
-function getCard(numberCardsMap, cardKey) {
-  return !numberCardsMap.has(cardKey) ? null : numberCardsMap.get(cardKey);
-}
-
-function removeCard(numberCardsMap, card) {
-  numberCardsMap.delete(card.key);
 }

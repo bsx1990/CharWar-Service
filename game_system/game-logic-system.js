@@ -56,8 +56,7 @@ function canGenerateRandomCharCard(gameMode, emptyCardsMap, numberCardsMap) {
   }
 
   const hasEmpthCards = emptyCardsMap.size > 0;
-  const maxCard = GAME_SYSTEM.getMaxCardValue(numberCardsMap);
-  const maxCardLargeThanGenerateLimit = maxCard > MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD;
+  const maxCardLargeThanGenerateLimit = GAME_SYSTEM.getMaxCardValue(numberCardsMap) > MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD;
   let random = GAME_SYSTEM.generateRandomValue(1, 100);
   const isRandomMatchedGenerateRate = random <= GAME_SYSTEM.CHAR_CARDS_GENERATE_RATE;
 
@@ -92,19 +91,24 @@ function combinCardsUntilNoSameCardsAround(socket, gameDatas, rowIndex, columnIn
   let foundSameCardsFromAround = combinedCards.length > 0;
 
   while (foundSameCardsFromAround) {
-    let combinedScore = sumCombinedCards(combinedCards);
-    gameDatas.score += combinedScore;
-    socket.emit(SCORE_CHANGED, gameDatas.score);
-    if (gameDatas.score > gameDatas.bestScore) {
-      gameDatas.bestScore = gameDatas.score;
-      socket.emit(BEST_SCORE_CHANGED, gameDatas.bestScore);
-    }
+    updateAndEmitScoreChanged(combinedCards, gameDatas, socket);
 
     combineCards(token, combinedCards, rowIndex, columnIndex);
     socket.emit(PLAYGROUND_CARDS_CHANGED, playgroundCards);
 
     combinedCards = getSameCardsFromAround(numberCardsMap, centerCard);
     foundSameCardsFromAround = combinedCards.length > 0;
+  }
+}
+
+function updateAndEmitScoreChanged(combinedCards, gameDatas, socket) {
+  let combinedScore = GAME_SYSTEM.getSumOfCardValues(combinedCards);
+
+  gameDatas.score += combinedScore;
+  socket.emit(SCORE_CHANGED, gameDatas.score);
+
+  if (GAME_SYSTEM.isBestScoreUpdated(gameDatas)) {
+    socket.emit(BEST_SCORE_CHANGED, gameDatas.bestScore);
   }
 }
 
@@ -129,11 +133,6 @@ function getSameCardsFromAround(numberCardsMap, centerCard) {
   });
 
   return result;
-}
-
-function sumCombinedCards(combinedCards) {
-  const reducer = (accumulator, currentValue) => accumulator + currentValue.value;
-  return combinedCards.reduce(reducer, 0);
 }
 
 function combineCards(token, combinedCards, rowIndex, columnIndex) {
