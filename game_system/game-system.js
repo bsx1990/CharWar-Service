@@ -80,9 +80,6 @@ module.exports = {
   setNumberCard: (token, card) => {
     gameDatasSystem.setNumberCard(token, card);
   },
-  increaseNumberCardValue: (token, rowIndex, columnIndex) => {
-    gameDatasSystem.increaseNumberCardValue(token, rowIndex, columnIndex);
-  },
   generateRandomValue: (minValue, maxValue) => {
     return gameDatasSystem.generateRandomValue(minValue, maxValue);
   },

@@ -41,7 +41,6 @@ module.exports = {
   getCardKeyByRowAndColumn: getCardKeyByRowAndColumn,
   createCard: createCard,
   setNumberCard: setNumberCard,
-  increaseNumberCardValue: increaseNumberCardValue,
   setCharCard: setCharCard
 };
 
@@ -161,23 +160,6 @@ function setNumberCard(token, card) {
     setCardForSpecificMap(numberCardsMap, card);
     removeCardForSpecificMap(emptyCardsMap, card);
   }
-  playgroundCardsSystem.updatePlaygroundCardsByCard(playgroundCards, card);
-}
-
-function increaseNumberCardValue(token, rowIndex, columnIndex) {
-  const gameDatas = getGameDatasByToken(token);
-  let numberCardsMap = gameDatas.numberCardsMap;
-  let playgroundCards = gameDatas.playgroundCards;
-  const cardKey = getCardKeyByRowAndColumn(rowIndex, columnIndex);
-
-  let card = numberCardsMap.get(cardKey);
-  if (card == null) {
-    console.log(`token:${token} doesn't have card ${cardKey}`);
-    return;
-  }
-
-  card.value = card.value + 1;
-  setCardForSpecificMap(numberCardsMap, card);
   playgroundCardsSystem.updatePlaygroundCardsByCard(playgroundCards, card);
 }
 
