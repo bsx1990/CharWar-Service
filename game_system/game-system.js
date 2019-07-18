@@ -17,6 +17,8 @@ const EACH_CHAR_CARD_GENERATE_RATE = CONFIG.eachCharCardGenerateRate;
 const CHAR_CARD_TYPE = CONFIG.charCardType;
 const CHAR_CARDS_GENERATE_RATE = CONFIG.CHAR_CARDS_GENERATE_RATE;
 const MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD = CONFIG.MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD;
+const SKILL_NAMES = CONFIG.skillNames;
+const PLAY_SKILL = CONFIG.responseType.playSkill;
 
 module.exports = {
   GAME_MODES,
@@ -37,6 +39,8 @@ module.exports = {
   CHAR_CARD_TYPE,
   CHAR_CARDS_GENERATE_RATE,
   MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD,
+  SKILL_NAMES,
+  PLAY_SKILL,
 
   initDatas: () => {
     return gameDatasSystem.initDatas();
@@ -100,9 +104,13 @@ module.exports = {
   },
   isBestScoreUpdated: gameDatas => {
     return scoreSystem.isBestScoreUpdated(gameDatas);
+  },
+  canExecuteCombinedSkill: combinedInfor => {
+    return combineSkillSystem.canExecuteCombinedSkill(combinedInfor);
   }
 };
 
 let gameDatasSystem = require('./game_datas_system/game-datas-system');
 let gameLogicSystem = require('./game-logic-system');
 let scoreSystem = require('./score-system');
+let combineSkillSystem = require('./combine-skill-system');

@@ -10,7 +10,8 @@ exports.responseType = {
   candidateCardsChanged: 'CandidateCardsChanged',
   scoreChanged: 'ScoreChanged',
   bestScoreChanged: 'BestScoreChanged',
-  gameStateChanged: 'GameStateChanged'
+  gameStateChanged: 'GameStateChanged',
+  playSkill: 'PlaySkill'
 };
 
 exports.PORT = 1001;
@@ -57,4 +58,8 @@ exports.charCardType = {
   A: 'A',
   B: 'B',
   C: 'C'
+};
+
+exports.skillNames = {
+  critsScoreSkill: 'CritsScoreSkill'
 };

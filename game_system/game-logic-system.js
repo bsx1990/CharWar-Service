@@ -13,6 +13,7 @@ const GAME_STATE_CHANGED = GAME_SYSTEM.GAME_STATE_CHANGED;
 const ALL_AROUND_ARROW = GAME_SYSTEM.ALL_AROUND_ARROW;
 const GAME_MODES = GAME_SYSTEM.GAME_MODES;
 const MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD = GAME_SYSTEM.MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD;
+const PLAY_SKILL = GAME_SYSTEM.PLAY_SKILL;
 
 function clickCard(socket, rowIndex, columnIndex) {
   const token = GAME_SYSTEM.getTokenBySocket(socket);
@@ -30,16 +31,31 @@ function clickCard(socket, rowIndex, columnIndex) {
   const currentCard = GAME_SYSTEM.createCard(rowIndex, columnIndex, gameDatas.candidateCards.shift());
   placeCardsBeforeCombinCards(socket, gameDatas, currentCard, token);
 
-  let canGenerateCharCard = canGenerateRandomCharCard(gameMode, emptyCardsMap, numberCardsMap);
+  let canGenerateCharCard = isWarMode(gameMode) && canGenerateRandomCharCard(emptyCardsMap, numberCardsMap);
   if (canGenerateCharCard) {
     generateCharCard(emptyCardsMap, socket, gameDatas);
   }
 
   const combinedInfor = combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(socket, gameDatas, currentCard);
-  console.log('combinedInfor:');
-  console.log(combinedInfor);
+  if (isWarMode(gameMode) && GAME_SYSTEM.canExecuteCombinedSkill(combinedInfor)) {
+    executeCombinedSkill(combinedInfor, socket, gameDatas);
+  } else {
+    updateAndEmitScoreChanged(combinedInfor.score, gameDatas, socket);
+    checkGameStatusAfterCombined(socket, gameDatas);
+  }
+}
 
-  checkGameStatusAfterCombined(socket, gameDatas);
+function executeCombinedSkill(combinedInfor, socket, gameDatas) {
+  const skill = combinedInfor.skill;
+  socket.emit(PLAY_SKILL, skill.name);
+
+  if (skill.type == 'buff') {
+    skill.execute(combinedInfor);
+    updateAndEmitScoreChanged(combinedInfor.score, gameDatas, socket);
+    checkGameStatusAfterCombined(socket, gameDatas);
+  } else {
+    console.log('got action skill');
+  }
 }
 
 function generateCharCard(emptyCardsMap, socket, gameDatas) {
@@ -51,22 +67,17 @@ function generateCharCard(emptyCardsMap, socket, gameDatas) {
   socket.emit(PLAYGROUND_CARDS_CHANGED, gameDatas.playgroundCards);
 }
 
-function canGenerateRandomCharCard(gameMode, emptyCardsMap, numberCardsMap) {
-  const isWarMode = gameMode == GAME_MODES.war;
-  if (!isWarMode) {
-    return false;
-  }
+function isWarMode(gameMode) {
+  return gameMode == GAME_MODES.war;
+}
 
+function canGenerateRandomCharCard(emptyCardsMap, numberCardsMap) {
   const hasEmpthCards = emptyCardsMap.size > 0;
   const maxCardLargeThanGenerateLimit = GAME_SYSTEM.getMaxCardValue(numberCardsMap) > MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD;
   let random = GAME_SYSTEM.generateRandomValue(1, 100);
   const isRandomMatchedGenerateRate = random <= GAME_SYSTEM.CHAR_CARDS_GENERATE_RATE;
 
-  const result = isWarMode && hasEmpthCards && maxCardLargeThanGenerateLimit && isRandomMatchedGenerateRate;
-  console.log(
-    `canGenerateRandomCharCard is ${result}, isWarMode:${isWarMode}, hasEmptyCards:${hasEmpthCards}, maxCardLargeThanGenerateLimit:${maxCardLargeThanGenerateLimit}, isRandomMatchedGenerateRate:${isRandomMatchedGenerateRate}`
-  );
-  return result;
+  return hasEmpthCards && maxCardLargeThanGenerateLimit && isRandomMatchedGenerateRate;
 }
 
 function placeCardsBeforeCombinCards(socket, gameDatas, currentCard, token) {
@@ -88,13 +99,13 @@ function combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(socket, gameDat
   let playgroundCards = gameDatas.playgroundCards;
   const numberCardsMap = gameDatas.numberCardsMap;
   const token = GAME_SYSTEM.getTokenBySocket(socket);
-  let combinedInformation = { round: 0, totalCoundOfCards: 0, maxCountOfSingleCombined: 0, combinedCardValue: 0 };
+  let combinedInformation = { round: 0, totalCountOfCards: 0, maxCountOfSingleCombined: 0, combinedCardValue: 0, skill: null, score: 0 };
 
   let combinedCards = getSameCardsFromAround(numberCardsMap, centerCard);
   let foundSameCardsFromAround = combinedCards.length > 0;
 
   while (foundSameCardsFromAround) {
-    updateAndEmitScoreChanged(combinedCards, gameDatas, socket);
+    recordScoreToCombinedInfor(combinedCards, combinedInformation);
 
     combineCards(token, combinedCards, centerCard, combinedInformation);
     socket.emit(PLAYGROUND_CARDS_CHANGED, playgroundCards);
@@ -106,12 +117,13 @@ function combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(socket, gameDat
   return combinedInformation;
 }
 
-function updateAndEmitScoreChanged(combinedCards, gameDatas, socket) {
-  let combinedScore = GAME_SYSTEM.getSumOfCardValues(combinedCards);
+function recordScoreToCombinedInfor(combinedCards, combinedInformation) {
+  combinedInformation.score += GAME_SYSTEM.getSumOfCardValues(combinedCards);
+}
 
-  gameDatas.score += combinedScore;
+function updateAndEmitScoreChanged(score, gameDatas, socket) {
+  gameDatas.score += score;
   socket.emit(SCORE_CHANGED, gameDatas.score);
-
   if (GAME_SYSTEM.isBestScoreUpdated(gameDatas)) {
     socket.emit(BEST_SCORE_CHANGED, gameDatas.bestScore);
   }
