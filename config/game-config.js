@@ -61,5 +61,6 @@ exports.charCardType = {
 };
 
 exports.skillNames = {
-  critsScoreSkill: 'Crits Score'
+  critsScoreSkill: 'Crits Score',
+  numberAttackSkill: 'Number Attack'
 };

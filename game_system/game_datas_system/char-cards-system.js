@@ -1,6 +1,7 @@
 module.exports = {
   getDefaultCards: getDefaultCards,
-  getRandomCharValue: getRandomCharValue
+  getRandomCharValue: getRandomCharValue,
+  decreaseValue: decreaseValue
 };
 
 let gameDatasSystem = require('./game-datas-system');
@@ -36,4 +37,21 @@ function getRandomCharValue() {
   }
 
   return null;
+}
+
+function decreaseValue(value) {
+  if (value == null) {
+    return null;
+  }
+
+  switch (value) {
+    case CHAR_CARD_TYPE.A:
+      return null;
+    case CHAR_CARD_TYPE.B:
+      return CHAR_CARD_TYPE.A;
+    case CHAR_CARD_TYPE.C:
+      return CHAR_CARD_TYPE.B;
+    default:
+      return null;
+  }
 }

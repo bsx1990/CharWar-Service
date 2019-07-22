@@ -41,7 +41,9 @@ module.exports = {
   getCardKeyByRowAndColumn: getCardKeyByRowAndColumn,
   createCard: createCard,
   setNumberCard: setNumberCard,
-  setCharCard: setCharCard
+  setCharCard: setCharCard,
+  getCardFromGameDatas: getCardFromGameDatas,
+  decreaseCard: decreaseCard
 };
 
 let candidateCardsSystem = require('./candidate-cards-system');
@@ -174,7 +176,7 @@ function setCharCard(token, card) {
     removeCardForSpecificMap(emptyCardsMap, card);
   } else {
     setCardForSpecificMap(emptyCardsMap, card);
-    removeCardForSpecificMap(emptyCardsMap, card);
+    removeCardForSpecificMap(charCardsMap, card);
   }
   playgroundCardsSystem.updatePlaygroundCardsByCard(playgroundCards, card);
 }
@@ -185,4 +187,35 @@ function setCardForSpecificMap(specificMap, card) {
 
 function removeCardForSpecificMap(specificMap, card) {
   specificMap.delete(card.key);
+}
+
+function getCardFromGameDatas(gameDatas, rowIndex, columnIndex) {
+  const cardKey = getCardKeyByRowAndColumn(rowIndex, columnIndex);
+
+  let charCardsMap = gameDatas.charCardsMap;
+  if (charCardsMap.has(cardKey)) {
+    return charCardsMap.get(cardKey);
+  }
+
+  let numberCardsMap = gameDatas.numberCardsMap;
+  if (numberCardsMap.has(cardKey)) {
+    return numberCardsMap.get(cardKey);
+  }
+
+  let emptyCardsMap = gameDatas.emptyCardsMap;
+  if (emptyCardsMap.has(cardKey)) {
+    return emptyCardsMap.get(cardKey);
+  }
+
+  return null;
+}
+
+function decreaseCard(card) {
+  let cardValue = card.value;
+  if (cardValue == null) {
+    return null;
+  }
+
+  cardValue = isNaN(cardValue) ? charCardsSystem.decreaseValue(cardValue) : numberCardsSystem.decreaseValue(cardValue);
+  return createCard(card.row, card.column, cardValue);
 }

@@ -105,8 +105,14 @@ module.exports = {
   isBestScoreUpdated: gameDatas => {
     return scoreSystem.isBestScoreUpdated(gameDatas);
   },
-  canExecuteCombinedSkill: combinedInfor => {
-    return combineSkillSystem.canExecuteCombinedSkill(combinedInfor);
+  canExecuteCombinedSkill: (combinedInfor, gameDatas) => {
+    return combineSkillSystem.canExecuteCombinedSkill(combinedInfor, gameDatas);
+  },
+  getCardFromGameDatas: (gameDatas, rowIndex, columnIndex) => {
+    return gameDatasSystem.getCardFromGameDatas(gameDatas, rowIndex, columnIndex);
+  },
+  decreaseCard: card => {
+    return gameDatasSystem.decreaseCard(card);
   }
 };
 

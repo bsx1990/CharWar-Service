@@ -1,6 +1,7 @@
 module.exports = {
   getMaxCardValue: getMaxCardValue,
-  getDefaultCards: getDefaultCards
+  getDefaultCards: getDefaultCards,
+  decreaseValue: decreaseValue
 };
 
 function getMaxCardValue(numberCardsMap) {
@@ -28,4 +29,17 @@ function getMaxCardValue(numberCardsMap) {
 
 function getDefaultCards() {
   return new Map();
+}
+
+function decreaseValue(value) {
+  if (value == null) {
+    return null;
+  }
+
+  switch (value) {
+    case 1:
+      return null;
+    default:
+      return value - 1;
+  }
 }

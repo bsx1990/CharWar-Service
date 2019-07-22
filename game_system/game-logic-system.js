@@ -25,7 +25,25 @@ function clickCard(socket, rowIndex, columnIndex) {
   let numberCardsMap = gameDatas.numberCardsMap;
   const hasCardAtClickedPosition = playgroundCards[rowIndex][columnIndex] != null;
   if (hasCardAtClickedPosition) {
+    if (gameDatas.gameState != 'SelectTarget') {
+      return;
+    }
+
+    var clickedCard = GAME_SYSTEM.getCardFromGameDatas(gameDatas, rowIndex, columnIndex);
+    if (clickedCard == null) {
+      return;
+    }
+
+    clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+    GAME_SYSTEM.setCharCard(token, clickedCard);
+    gameDatas.gameState = null;
+    GAME_SYSTEM.emitGameDatas(socket);
+    checkGameStatusAfterCombined(socket, gameDatas);
     return;
+  } else {
+    if (gameDatas.gameState == 'SelectTarget') {
+      return;
+    }
   }
 
   const currentCard = GAME_SYSTEM.createCard(rowIndex, columnIndex, gameDatas.candidateCards.shift());
@@ -37,7 +55,7 @@ function clickCard(socket, rowIndex, columnIndex) {
   }
 
   const combinedInfor = combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(socket, gameDatas, currentCard);
-  if (isWarMode(gameMode) && GAME_SYSTEM.canExecuteCombinedSkill(combinedInfor)) {
+  if (isWarMode(gameMode) && GAME_SYSTEM.canExecuteCombinedSkill(combinedInfor, gameDatas)) {
     executeCombinedSkill(combinedInfor, socket, gameDatas);
   } else {
     updateAndEmitScoreChanged(combinedInfor.score, gameDatas, socket);
@@ -55,6 +73,8 @@ function executeCombinedSkill(combinedInfor, socket, gameDatas) {
     checkGameStatusAfterCombined(socket, gameDatas);
   } else {
     console.log('got action skill');
+    gameDatas.gameState = 'SelectTarget';
+    socket.emit(GAME_STATE_CHANGED, gameDatas.gameState);
   }
 }
 
@@ -169,7 +189,7 @@ function updateCombinedInforForSingleRound(combinedInformation, cardsOfThisRound
   if (cardsOfThisRound.length > combinedInformation.maxCountOfSingleCombined) {
     combinedInformation.maxCountOfSingleCombined = cardsOfThisRound.length;
   }
-  combinedInformation.totalCoundOfCards += cardsOfThisRound.length;
+  combinedInformation.totalCountOfCards += cardsOfThisRound.length;
   combinedInformation.combinedCardValue = centerCard.value;
 }
 
