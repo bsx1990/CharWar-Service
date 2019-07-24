@@ -19,10 +19,7 @@ module.exports = {
   getMaxCardValue: numberCardsMap => {
     return numberCardsSystem.getMaxCardValue(numberCardsMap);
   },
-  appendRandomCandidateCard: (numberCardsMap, candidateCards) => {
-    const currentMaxCardValue = numberCardsSystem.getMaxCardValue(numberCardsMap);
-    candidateCardsSystem.appendRandomCandidateCard(candidateCards, currentMaxCardValue);
-  },
+  appendRandomCandidateCard,
   getRandomEmptyCard: emptyCardsMap => {
     return emptyCardsSystem.getRandomEmptyCard(emptyCardsMap);
   },
@@ -32,7 +29,7 @@ module.exports = {
 
   generateRandomValue: generateRandomValue,
   initDatas: initDatas,
-  recordTokenToRequestMapping: recordTokenToRequestMapping,
+  recordTokenToRequestMapping,
   getGameDatasByToken: getGameDatasByToken,
   resetGameDatas: resetGameDatas,
   emitGameDatas: emitGameDatas,
@@ -55,6 +52,11 @@ let playgroundCardsSystem = require('./playground-cards-system');
 let identifyAndGameDatasrequestMapping = new Map();
 let tokenAndGameModeMapping = new Map();
 
+function appendRandomCandidateCard(numberCardsMap, candidateCards) {
+  const currentMaxCardValue = numberCardsSystem.getMaxCardValue(numberCardsMap);
+  candidateCardsSystem.appendRandomCandidateCard(candidateCards, currentMaxCardValue);
+}
+
 function initDatas() {
   const defaultNumerCardsMap = numberCardsSystem.getDefaultCards();
   const defaultCharCardsMap = charCardsSystem.getDefaultCards();
@@ -69,8 +71,8 @@ function initDatas() {
     bestScore: 0,
     gameState: ''
   };
-  GAME_SYSTEM.appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
-  GAME_SYSTEM.appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
+  appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
+  appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
   return gameDatas;
 }
 
@@ -100,7 +102,7 @@ function recordTokenToRequestMapping(token) {
 
   const identify = getIdentifyByToken(token);
   if (!identifyAndGameDatasrequestMapping.has(identify)) {
-    identifyAndGameDatasrequestMapping.set(identify, GAME_SYSTEM.initDatas());
+    identifyAndGameDatasrequestMapping.set(identify, initDatas());
   }
 }
 
@@ -112,7 +114,7 @@ function getGameDatasByToken(token) {
 function resetGameDatas(socket) {
   const token = GAME_SYSTEM.getTokenBySocket(socket);
   const identify = getIdentifyByToken(token);
-  identifyAndGameDatasrequestMapping.set(identify, GAME_SYSTEM.initDatas());
+  identifyAndGameDatasrequestMapping.set(identify, initDatas());
   emitGameDatas(socket);
 }
 
@@ -133,7 +135,7 @@ function emitGameDatas(socket) {
 
 function setCurrentGameMode(token, mode) {
   tokenAndGameModeMapping.set(token, mode);
-  GAME_SYSTEM.recordTokenToRequestMapping(token);
+  recordTokenToRequestMapping(token);
 }
 
 function getGameModeByToken(token) {

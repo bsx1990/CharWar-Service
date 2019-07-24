@@ -42,81 +42,75 @@ module.exports = {
   SKILL_NAMES,
   PLAY_SKILL,
 
-  initDatas: () => {
-    return gameDatasSystem.initDatas();
-  },
   appendRandomCandidateCard: (numberCardsMap, candidateCards) => {
-    gameDatasSystem.appendRandomCandidateCard(numberCardsMap, candidateCards);
-  },
-  recordTokenToRequestMapping: token => {
-    gameDatasSystem.recordTokenToRequestMapping(token);
+    DATAS_SYSTEM.appendRandomCandidateCard(numberCardsMap, candidateCards);
   },
   getGameDatasByToken: token => {
-    return gameDatasSystem.getGameDatasByToken(token);
+    return DATAS_SYSTEM.getGameDatasByToken(token);
   },
   clickCard: (socket, rowIndex, columnIndex) => {
-    gameLogicSystem.clickCard(socket, rowIndex, columnIndex);
+    LOGIC_SYSTEM.clickCard(socket, rowIndex, columnIndex);
   },
   replay: socket => {
-    gameLogicSystem.replay(socket);
+    LOGIC_SYSTEM.replay(socket);
   },
   resetGameDatas: socket => {
-    gameDatasSystem.resetGameDatas(socket);
+    DATAS_SYSTEM.resetGameDatas(socket);
   },
   emitGameDatas: socket => {
-    gameDatasSystem.emitGameDatas(socket);
+    DATAS_SYSTEM.emitGameDatas(socket);
   },
   changeGameMode: (token, mode) => {
-    gameDatasSystem.setCurrentGameMode(token, mode);
+    DATAS_SYSTEM.setCurrentGameMode(token, mode);
   },
   getTokenBySocket: socket => {
     return socket.handshake.query.token;
   },
   getGameModeByToken: token => {
-    return gameDatasSystem.getGameModeByToken(token);
+    return DATAS_SYSTEM.getGameModeByToken(token);
   },
   getCardKeyByRowAndColumn: (rowIndex, columnIndex) => {
-    return gameDatasSystem.getCardKeyByRowAndColumn(rowIndex, columnIndex);
+    return DATAS_SYSTEM.getCardKeyByRowAndColumn(rowIndex, columnIndex);
   },
   createCard: (rowIndex, columnIndex, value) => {
-    return gameDatasSystem.createCard(rowIndex, columnIndex, value);
+    return DATAS_SYSTEM.createCard(rowIndex, columnIndex, value);
   },
   setNumberCard: (token, card) => {
-    gameDatasSystem.setNumberCard(token, card);
+    DATAS_SYSTEM.setNumberCard(token, card);
   },
   generateRandomValue: (minValue, maxValue) => {
-    return gameDatasSystem.generateRandomValue(minValue, maxValue);
+    return DATAS_SYSTEM.generateRandomValue(minValue, maxValue);
   },
   getMaxCardValue: numberCardsMap => {
-    return gameDatasSystem.getMaxCardValue(numberCardsMap);
+    return DATAS_SYSTEM.getMaxCardValue(numberCardsMap);
   },
   getRandomEmptyCard: emptyCardsMap => {
-    return gameDatasSystem.getRandomEmptyCard(emptyCardsMap);
+    return DATAS_SYSTEM.getRandomEmptyCard(emptyCardsMap);
   },
   getRandomCharValue: () => {
-    return gameDatasSystem.getRandomCharValue();
+    return DATAS_SYSTEM.getRandomCharValue();
   },
   setCharCard: (token, card) => {
-    gameDatasSystem.setCharCard(token, card);
+    DATAS_SYSTEM.setCharCard(token, card);
   },
   getSumOfCardValues: cards => {
-    return scoreSystem.getSumOfCardValues(cards);
+    return SCORE_SYSTEM.getSumOfCardValues(cards);
   },
   isBestScoreUpdated: gameDatas => {
-    return scoreSystem.isBestScoreUpdated(gameDatas);
+    return SCORE_SYSTEM.isBestScoreUpdated(gameDatas);
   },
   canExecuteCombinedSkill: (combinedInfor, gameDatas) => {
-    return combineSkillSystem.canExecuteCombinedSkill(combinedInfor, gameDatas);
+    return SKILL_SYSTEM.canExecuteCombinedSkill(combinedInfor, gameDatas);
   },
   getCardFromGameDatas: (gameDatas, rowIndex, columnIndex) => {
-    return gameDatasSystem.getCardFromGameDatas(gameDatas, rowIndex, columnIndex);
+    return DATAS_SYSTEM.getCardFromGameDatas(gameDatas, rowIndex, columnIndex);
   },
   decreaseCard: card => {
-    return gameDatasSystem.decreaseCard(card);
+    return DATAS_SYSTEM.decreaseCard(card);
   }
 };
 
-let gameDatasSystem = require('./game_datas_system/game-datas-system');
-let gameLogicSystem = require('./game-logic-system');
-let scoreSystem = require('./score-system');
-let combineSkillSystem = require('./combine-skill-system');
+let DATAS_SYSTEM = require('./game_datas_system/game-datas-system');
+let LOGIC_SYSTEM = require('./game-logic-system/logic-system');
+let SCORE_SYSTEM = require('./score-system');
+let SKILL_SYSTEM = require('./combine-skill-system');
