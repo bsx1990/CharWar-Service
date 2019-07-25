@@ -10,22 +10,15 @@ function clickCard(socket, rowIndex, columnIndex) {
   let emptyCardsMap = gameDatas.emptyCardsMap;
   let numberCardsMap = gameDatas.numberCardsMap;
   const hasCardAtClickedPosition = playgroundCards[rowIndex][columnIndex] != null;
-  if (hasCardAtClickedPosition) {
-    var clickedCard = GAME_SYSTEM.getCardFromGameDatas(gameDatas, rowIndex, columnIndex);
-    if (clickedCard == null) {
-      return;
-    }
+  const needResponseSkill = gameDatas.gameState == 'SelectTarget';
 
-    clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
-    GAME_SYSTEM.setCharCard(token, clickedCard);
-    gameDatas.gameState = null;
-    GAME_SYSTEM.emitGameDatas(socket);
-    LOGIC_SYSTEM.checkGameStatusAfterCombined(socket, gameDatas);
+  if (needResponseSkill && hasCardAtClickedPosition) {
+    responseSkill(gameDatas, socket, rowIndex, columnIndex);
     return;
-  } else {
-    if (gameDatas.gameState == 'SelectTarget') {
-      return;
-    }
+  }
+
+  if ((needResponseSkill && !hasCardAtClickedPosition) || (!needResponseSkill && hasCardAtClickedPosition)) {
+    return;
   }
 
   const currentCard = GAME_SYSTEM.createCard(rowIndex, columnIndex, gameDatas.candidateCards.shift());
@@ -43,6 +36,20 @@ function clickCard(socket, rowIndex, columnIndex) {
     LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas, socket);
     LOGIC_SYSTEM.checkGameStatusAfterCombined(socket, gameDatas);
   }
+}
+
+function responseSkill(gameDatas, socket, rowIndex, columnIndex) {
+  const token = GAME_SYSTEM.getTokenBySocket(socket);
+  var clickedCard = GAME_SYSTEM.getCardFromGameDatas(gameDatas, rowIndex, columnIndex);
+  if (clickedCard == null) {
+    return;
+  }
+  clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+  GAME_SYSTEM.setCharCard(token, clickedCard);
+  gameDatas.gameState = null;
+  GAME_SYSTEM.emitGameDatas(socket);
+  LOGIC_SYSTEM.checkGameStatusAfterCombined(socket, gameDatas);
+  return clickedCard;
 }
 
 function canGenerateRandomCharCard(emptyCardsMap, numberCardsMap) {
@@ -69,8 +76,8 @@ function executeCombinedSkill(combinedInfor, socket, gameDatas) {
 
   if (skill.type == 'buff') {
     skill.execute(combinedInfor);
-    updateAndEmitScoreChanged(combinedInfor.score, gameDatas, socket);
-    checkGameStatusAfterCombined(socket, gameDatas);
+    LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas, socket);
+    LOGIC_SYSTEM.checkGameStatusAfterCombined(socket, gameDatas);
   } else {
     console.log('got action skill');
     gameDatas.gameState = 'SelectTarget';
