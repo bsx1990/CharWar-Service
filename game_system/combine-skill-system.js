@@ -41,16 +41,17 @@ const numberAttackSkill = {
   execute: () => {}
 };
 
-const SKILLS = [numberAttackSkill, critsScoreSkill];
+const SKILLS = [critsScoreSkill, numberAttackSkill];
 
 function canExecuteCombinedSkill(combinedInfor, gameDatas) {
+  var result = false;
   for (let index = 0; index < SKILLS.length; index++) {
     const skill = SKILLS[index];
     if (skill.canExecute(combinedInfor, gameDatas)) {
-      combinedInfor.skill = skill;
+      combinedInfor.skills.push(skill);
       console.log('can execute bombined skill');
-      return true;
+      result = true;
     }
   }
-  return false;
+  return result;
 }

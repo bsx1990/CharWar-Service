@@ -71,18 +71,21 @@ function generateCharCard(emptyCardsMap, socket, gameDatas) {
 }
 
 function executeCombinedSkill(combinedInfor, socket, gameDatas) {
-  const skill = combinedInfor.skill;
-  socket.emit(PLAY_SKILL, skill.name);
+  combinedInfor.skills.forEach(skill => {
+    socket.emit(PLAY_SKILL, skill.name);
 
-  if (skill.type == 'buff') {
-    skill.execute(combinedInfor);
-    LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas, socket);
-    LOGIC_SYSTEM.checkGameStatusAfterCombined(socket, gameDatas);
-  } else {
-    console.log('got action skill');
-    gameDatas.gameState = 'SelectTarget';
-    socket.emit(GAME_STATE_CHANGED, gameDatas.gameState);
-  }
+    if (skill.type == 'buff') {
+      skill.execute(combinedInfor);
+      LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas, socket);
+      LOGIC_SYSTEM.checkGameStatusAfterCombined(socket, gameDatas);
+    } else {
+      console.log('got action skill');
+      gameDatas.gameState = 'SelectTarget';
+      socket.emit(GAME_STATE_CHANGED, gameDatas.gameState);
+    }
+  });
+
+  combinedInfor.skills = [];
 }
 
 const GAME_SYSTEM = require('../game-system');

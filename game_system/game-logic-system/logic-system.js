@@ -51,7 +51,7 @@ function combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(socket, gameDat
   let playgroundCards = gameDatas.playgroundCards;
   const numberCardsMap = gameDatas.numberCardsMap;
   const token = GAME_SYSTEM.getTokenBySocket(socket);
-  let combinedInformation = { round: 0, totalCountOfCards: 0, maxCountOfSingleCombined: 0, combinedCardValue: 0, skill: null, score: 0 };
+  let combinedInformation = { round: 0, totalCountOfCards: 0, maxCountOfSingleCombined: 0, combinedCardValue: 0, skills: [], score: 0 };
 
   let combinedCards = getSameCardsFromAround(numberCardsMap, centerCard);
   let foundSameCardsFromAround = combinedCards.length > 0;
