@@ -2,18 +2,16 @@ module.exports = {
   clickCard
 };
 
-function clickCard(socket, rowIndex, columnIndex) {
-  const token = GAME_SYSTEM.getTokenBySocket(socket);
-  const gameDatas = GAME_SYSTEM.getGameDatasByToken(token);
-
+function clickCard(gameDatas, rowIndex, columnIndex) {
   let playgroundCards = gameDatas.playgroundCards;
   let emptyCardsMap = gameDatas.emptyCardsMap;
   let numberCardsMap = gameDatas.numberCardsMap;
   const hasCardAtClickedPosition = playgroundCards[rowIndex][columnIndex] != null;
   const needResponseSkill = gameDatas.gameState == 'SelectTarget';
+  const clickedCard = GAME_SYSTEM.getCardFromGameDatas(gameDatas, rowIndex, columnIndex);
 
   if (needResponseSkill && hasCardAtClickedPosition) {
-    responseSkill(gameDatas, socket, rowIndex, columnIndex);
+    responseSkill(gameDatas, clickedCard);
     return;
   }
 
@@ -21,35 +19,32 @@ function clickCard(socket, rowIndex, columnIndex) {
     return;
   }
 
-  const currentCard = GAME_SYSTEM.createCard(rowIndex, columnIndex, gameDatas.candidateCards.shift());
-  LOGIC_SYSTEM.placeCardsBeforeCombinCards(socket, gameDatas, currentCard, token);
+  clickedCard.value = gameDatas.candidateCards.shift();
+  LOGIC_SYSTEM.placeCardsBeforeCombinCards(gameDatas, clickedCard);
 
   let canGenerateCharCard = canGenerateRandomCharCard(emptyCardsMap, numberCardsMap);
   if (canGenerateCharCard) {
-    generateCharCard(emptyCardsMap, socket, gameDatas);
+    generateCharCard(emptyCardsMap, gameDatas);
   }
 
-  const combinedInfor = LOGIC_SYSTEM.combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(socket, gameDatas, currentCard);
+  const combinedInfor = LOGIC_SYSTEM.combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(gameDatas, clickedCard);
   if (GAME_SYSTEM.canExecuteCombinedSkill(combinedInfor, gameDatas)) {
-    executeCombinedSkill(combinedInfor, socket, gameDatas);
+    executeCombinedSkill(combinedInfor, gameDatas);
   } else {
-    LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas, socket);
-    LOGIC_SYSTEM.checkGameStatusAfterCombined(socket, gameDatas);
+    LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas);
+    LOGIC_SYSTEM.checkGameStatusAfterCombined(gameDatas);
   }
 }
 
-function responseSkill(gameDatas, socket, rowIndex, columnIndex) {
-  const token = GAME_SYSTEM.getTokenBySocket(socket);
-  var clickedCard = GAME_SYSTEM.getCardFromGameDatas(gameDatas, rowIndex, columnIndex);
+function responseSkill(gameDatas, clickedCard) {
   if (clickedCard == null) {
     return;
   }
-  clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
-  GAME_SYSTEM.setCharCard(token, clickedCard);
-  gameDatas.gameState = null;
-  GAME_SYSTEM.emitGameDatas(socket);
-  LOGIC_SYSTEM.checkGameStatusAfterCombined(socket, gameDatas);
-  return clickedCard;
+
+  while (gameDatas.combinedSkills.legth > 0) {
+    const skill = gameDatas.combinedSkills.shift();
+    skill.execute(clickedCard, gameDatas);
+  }
 }
 
 function canGenerateRandomCharCard(emptyCardsMap, numberCardsMap) {
@@ -61,25 +56,27 @@ function canGenerateRandomCharCard(emptyCardsMap, numberCardsMap) {
   return hasEmpthCards && maxCardLargeThanGenerateLimit && isRandomMatchedGenerateRate;
 }
 
-function generateCharCard(emptyCardsMap, socket, gameDatas) {
+function generateCharCard(emptyCardsMap, gameDatas) {
+  const socket = gameDatas.socket;
   let card = GAME_SYSTEM.getRandomEmptyCard(emptyCardsMap);
   card.value = GAME_SYSTEM.getRandomCharValue();
 
-  const token = GAME_SYSTEM.getTokenBySocket(socket);
-  GAME_SYSTEM.setCharCard(token, card);
+  GAME_SYSTEM.setCharCard(gameDatas, card);
   socket.emit(PLAYGROUND_CARDS_CHANGED, gameDatas.playgroundCards);
 }
 
-function executeCombinedSkill(combinedInfor, socket, gameDatas) {
+function executeCombinedSkill(combinedInfor, gameDatas) {
+  const socket = gameDatas.socket;
+
   combinedInfor.skills.forEach(skill => {
     socket.emit(PLAY_SKILL, skill.name);
 
-    if (skill.type == 'buff') {
+    if (skill.type == SKILL_TYPE.noResponse) {
       skill.execute(combinedInfor);
-      LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas, socket);
-      LOGIC_SYSTEM.checkGameStatusAfterCombined(socket, gameDatas);
+      LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas);
+      LOGIC_SYSTEM.checkGameStatusAfterCombined(gameDatas);
     } else {
-      console.log('got action skill');
+      gameDatas.combinedSkills.push(skill);
       gameDatas.gameState = 'SelectTarget';
       socket.emit(GAME_STATE_CHANGED, gameDatas.gameState);
     }
@@ -94,3 +91,4 @@ const MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD = GAME_SYSTEM.MIN_CARD_VALUE_L
 const PLAY_SKILL = GAME_SYSTEM.PLAY_SKILL;
 const PLAYGROUND_CARDS_CHANGED = GAME_SYSTEM.PLAYGROUND_CARDS_CHANGED;
 const GAME_STATE_CHANGED = GAME_SYSTEM.GAME_STATE_CHANGED;
+const SKILL_TYPE = GAME_SYSTEM.SKILL_TYPE;

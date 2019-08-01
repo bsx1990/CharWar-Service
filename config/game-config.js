@@ -62,5 +62,19 @@ exports.charCardType = {
 
 exports.skillNames = {
   critsScoreSkill: 'Crits Score',
+  critsScore3TimesSkill: 'Crits Score: 3 Times',
+  critsScore5TimesSkill: 'Crits Score: 5 Times',
+  critsScore10TimesSkill: 'Crits Score: 10 Times',
   numberAttackSkill: 'Number Attack'
+};
+
+exports.skillPriority = {
+  high: 0,
+  normal: 1,
+  low: 2
+};
+
+exports.skillType = {
+  noResponse: 'NoResponse',
+  needResponse: 'NeedResponse'
 };

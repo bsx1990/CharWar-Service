@@ -1,5 +1,6 @@
 module.exports = {
-  appendRandomCandidateCard: appendRandomCandidateCard
+  appendRandomCandidateCard,
+  getDefaultCards
 };
 
 let gameDatasSystem = require('./game-datas-system');
@@ -16,4 +17,8 @@ function generateRandomCardValue(maxCardValue) {
   }
 
   return gameDatasSystem.generateRandomValue(minCardValue, maxCardValue);
+}
+
+function getDefaultCards() {
+  return [];
 }

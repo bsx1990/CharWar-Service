@@ -27,20 +27,18 @@ module.exports = {
     return charCardsSystem.getRandomCharValue();
   },
 
-  generateRandomValue: generateRandomValue,
-  initDatas: initDatas,
-  recordTokenToRequestMapping,
-  getGameDatasByToken: getGameDatasByToken,
-  resetGameDatas: resetGameDatas,
-  emitGameDatas: emitGameDatas,
-  setCurrentGameMode: setCurrentGameMode,
-  getGameModeByToken: getGameModeByToken,
-  getCardKeyByRowAndColumn: getCardKeyByRowAndColumn,
-  createCard: createCard,
-  setNumberCard: setNumberCard,
-  setCharCard: setCharCard,
-  getCardFromGameDatas: getCardFromGameDatas,
-  decreaseCard: decreaseCard
+  generateRandomValue,
+  getGameDatasByToken,
+  resetGameDatas,
+  emitGameDatas,
+  setCurrentGameMode,
+  getGameModeByToken,
+  getCardKeyByRowAndColumn,
+  createCard,
+  setNumberCard,
+  setCharCard,
+  getCardFromGameDatas,
+  decreaseCard
 };
 
 let candidateCardsSystem = require('./candidate-cards-system');
@@ -57,23 +55,31 @@ function appendRandomCandidateCard(numberCardsMap, candidateCards) {
   candidateCardsSystem.appendRandomCandidateCard(candidateCards, currentMaxCardValue);
 }
 
-function initDatas() {
+function initDatas(socket) {
   const defaultNumerCardsMap = numberCardsSystem.getDefaultCards();
   const defaultCharCardsMap = charCardsSystem.getDefaultCards();
   const defaultEmptyCardsMap = emptyCardsSystem.getDefaultCards();
-  const gameDatas = {
+  const defaultCandidateCards = candidateCardsSystem.getDefaultCards();
+  const gameDatas = createGameDatas(defaultNumerCardsMap, defaultCharCardsMap, defaultEmptyCardsMap, defaultCandidateCards, socket);
+  appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
+  appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
+  return gameDatas;
+}
+
+function createGameDatas(defaultNumerCardsMap, defaultCharCardsMap, defaultEmptyCardsMap, defaultCandidateCards, socket) {
+  return {
+    token: GAME_SYSTEM.getTokenBySocket(socket),
+    socket: socket,
     numberCardsMap: defaultNumerCardsMap,
     charCardsMap: defaultCharCardsMap,
     emptyCardsMap: defaultEmptyCardsMap,
     playgroundCards: playgroundCardsSystem.getPlaygroundCards(defaultNumerCardsMap, defaultCharCardsMap, defaultEmptyCardsMap),
-    candidateCards: [],
+    candidateCards: defaultCandidateCards,
     score: 0,
     bestScore: 0,
-    gameState: ''
+    gameState: '',
+    combinedSkills: []
   };
-  appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
-  appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
-  return gameDatas;
 }
 
 function generateRandomValue(minValue, maxValue) {
@@ -95,17 +101,6 @@ function getCardKeyByRowAndColumn(row, column) {
   return `${row}/${column}`;
 }
 
-function recordTokenToRequestMapping(token) {
-  if (token == undefined || token == null) {
-    return;
-  }
-
-  const identify = getIdentifyByToken(token);
-  if (!identifyAndGameDatasrequestMapping.has(identify)) {
-    identifyAndGameDatasrequestMapping.set(identify, initDatas());
-  }
-}
-
 function getGameDatasByToken(token) {
   const identify = getIdentifyByToken(token);
   return identifyAndGameDatasrequestMapping.get(identify);
@@ -114,7 +109,7 @@ function getGameDatasByToken(token) {
 function resetGameDatas(socket) {
   const token = GAME_SYSTEM.getTokenBySocket(socket);
   const identify = getIdentifyByToken(token);
-  identifyAndGameDatasrequestMapping.set(identify, initDatas());
+  identifyAndGameDatasrequestMapping.set(identify, initDatas(socket));
   emitGameDatas(socket);
 }
 
@@ -133,9 +128,31 @@ function emitGameDatas(socket) {
   socket.emit(GAME_STATE_CHANGED, gameState);
 }
 
-function setCurrentGameMode(token, mode) {
+function setCurrentGameMode(socket, mode) {
+  const token = GAME_SYSTEM.getTokenBySocket(socket);
   tokenAndGameModeMapping.set(token, mode);
-  recordTokenToRequestMapping(token);
+  recordRequest(token, socket);
+}
+
+function recordRequest(token, socket) {
+  if (token == undefined || token == null) {
+    return;
+  }
+
+  const identify = getIdentifyByToken(token);
+  if (!identifyAndGameDatasrequestMapping.has(identify)) {
+    identifyAndGameDatasrequestMapping.set(identify, initDatas(socket));
+  } else {
+    updateSocketInGameDatas(socket, identifyAndGameDatasrequestMapping.get(identify));
+  }
+}
+
+function updateSocketInGameDatas(socket, gameDatas) {
+  gameDatas.socket = socket;
+}
+
+function getIdentifyByToken(token) {
+  return `${token}=>${getGameModeByToken(token)}`;
 }
 
 function getGameModeByToken(token) {
@@ -147,48 +164,35 @@ function getGameModeByToken(token) {
   }
 }
 
-function getIdentifyByToken(token) {
-  return `${token}=>${getGameModeByToken(token)}`;
-}
-
-function setNumberCard(token, card) {
-  let gameDatas = getGameDatasByToken(token);
+function setNumberCard(gameDatas, card) {
   let numberCardsMap = gameDatas.numberCardsMap;
   let emptyCardsMap = gameDatas.emptyCardsMap;
   let playgroundCards = gameDatas.playgroundCards;
 
   if (card.value == undefined || card.value == null) {
-    setCardForSpecificMap(emptyCardsMap, card);
-    removeCardForSpecificMap(numberCardsMap, card);
+    moveCardFromMapToMap(card, numberCardsMap, emptyCardsMap);
   } else {
-    setCardForSpecificMap(numberCardsMap, card);
-    removeCardForSpecificMap(emptyCardsMap, card);
+    moveCardFromMapToMap(card, emptyCardsMap, numberCardsMap);
   }
   playgroundCardsSystem.updatePlaygroundCardsByCard(playgroundCards, card);
 }
 
-function setCharCard(token, card) {
-  let gameDatas = getGameDatasByToken(token);
+function setCharCard(gameDatas, card) {
   let charCardsMap = gameDatas.charCardsMap;
   let emptyCardsMap = gameDatas.emptyCardsMap;
   let playgroundCards = gameDatas.playgroundCards;
 
-  if (card.value != undefined && card.value != null) {
-    setCardForSpecificMap(charCardsMap, card);
-    removeCardForSpecificMap(emptyCardsMap, card);
+  if (card.value == undefined || card.value == null) {
+    moveCardFromMapToMap(card, charCardsMap, emptyCardsMap);
   } else {
-    setCardForSpecificMap(emptyCardsMap, card);
-    removeCardForSpecificMap(charCardsMap, card);
+    moveCardFromMapToMap(card, emptyCardsMap, charCardsMap);
   }
   playgroundCardsSystem.updatePlaygroundCardsByCard(playgroundCards, card);
 }
 
-function setCardForSpecificMap(specificMap, card) {
-  specificMap.set(card.key, card);
-}
-
-function removeCardForSpecificMap(specificMap, card) {
-  specificMap.delete(card.key);
+function moveCardFromMapToMap(card, fromMaps, toMaps) {
+  toMaps.set(card.key, card);
+  fromMaps.delete(card.key);
 }
 
 function getCardFromGameDatas(gameDatas, rowIndex, columnIndex) {

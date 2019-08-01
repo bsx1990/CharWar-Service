@@ -10,13 +10,14 @@ module.exports = {
 function clickCard(socket, rowIndex, columnIndex) {
   const token = GAME_SYSTEM.getTokenBySocket(socket);
   const gameMode = GAME_SYSTEM.getGameModeByToken(token);
+  const gameDatas = GAME_SYSTEM.getGameDatasByToken(token);
 
   let logicHandler = getLogicHandler(gameMode);
   if (logicHandler == null) {
     return;
   }
 
-  logicHandler.clickCard(socket, rowIndex, columnIndex);
+  logicHandler.clickCard(gameDatas, rowIndex, columnIndex);
 }
 
 function getLogicHandler(gameMode) {
@@ -32,25 +33,25 @@ function getLogicHandler(gameMode) {
   }
 }
 
-function placeCardsBeforeCombinCards(socket, gameDatas, currentCard, token) {
-  generateNewCandidateCardsAndEmitChange(socket, gameDatas);
-  placeCardAtClickedPositionAndEmitChange(socket, gameDatas, currentCard, token);
+function placeCardsBeforeCombinCards(gameDatas, currentCard) {
+  generateNewCandidateCardsAndEmitChange(gameDatas);
+  placeCardAtClickedPositionAndEmitChange(gameDatas, currentCard);
 }
 
-function generateNewCandidateCardsAndEmitChange(socket, gameDatas) {
+function generateNewCandidateCardsAndEmitChange(gameDatas) {
   GAME_SYSTEM.appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
-  socket.emit(CANDIDATE_CARDS_CHANGED, gameDatas.candidateCards);
+  gameDatas.socket.emit(CANDIDATE_CARDS_CHANGED, gameDatas.candidateCards);
 }
 
-function placeCardAtClickedPositionAndEmitChange(socket, gameDatas, card, token) {
-  GAME_SYSTEM.setNumberCard(token, card);
-  socket.emit(PLAYGROUND_CARDS_CHANGED, gameDatas.playgroundCards);
+function placeCardAtClickedPositionAndEmitChange(gameDatas, card) {
+  GAME_SYSTEM.setNumberCard(gameDatas, card);
+  gameDatas.socket.emit(PLAYGROUND_CARDS_CHANGED, gameDatas.playgroundCards);
 }
 
-function combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(socket, gameDatas, centerCard) {
+function combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(gameDatas, centerCard) {
+  const socket = gameDatas.socket;
   let playgroundCards = gameDatas.playgroundCards;
   const numberCardsMap = gameDatas.numberCardsMap;
-  const token = GAME_SYSTEM.getTokenBySocket(socket);
   let combinedInformation = { round: 0, totalCountOfCards: 0, maxCountOfSingleCombined: 0, combinedCardValue: 0, skills: [], score: 0 };
 
   let combinedCards = getSameCardsFromAround(numberCardsMap, centerCard);
@@ -59,7 +60,7 @@ function combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(socket, gameDat
   while (foundSameCardsFromAround) {
     recordScoreToCombinedInfor(combinedCards, combinedInformation);
 
-    combineCards(token, combinedCards, centerCard, combinedInformation);
+    combineCards(gameDatas, combinedCards, centerCard, combinedInformation);
     socket.emit(PLAYGROUND_CARDS_CHANGED, playgroundCards);
 
     combinedCards = getSameCardsFromAround(numberCardsMap, centerCard);
@@ -96,16 +97,16 @@ function recordScoreToCombinedInfor(combinedCards, combinedInformation) {
   combinedInformation.score += GAME_SYSTEM.getSumOfCardValues(combinedCards);
 }
 
-function combineCards(token, cards, centerCard, combinedInformation) {
+function combineCards(gameDatas, cards, centerCard, combinedInformation) {
   centerCard.value += 1;
   updateCombinedInforForSingleRound(combinedInformation, cards, centerCard);
 
   cards.forEach(card => {
     card.value = null;
-    GAME_SYSTEM.setNumberCard(token, card);
+    GAME_SYSTEM.setNumberCard(gameDatas, card);
   });
 
-  GAME_SYSTEM.setNumberCard(token, centerCard);
+  GAME_SYSTEM.setNumberCard(gameDatas, centerCard);
 }
 
 function updateCombinedInforForSingleRound(combinedInformation, cardsOfThisRound, centerCard) {
@@ -117,7 +118,8 @@ function updateCombinedInforForSingleRound(combinedInformation, cardsOfThisRound
   combinedInformation.combinedCardValue = centerCard.value;
 }
 
-function updateAndEmitScoreChanged(score, gameDatas, socket) {
+function updateAndEmitScoreChanged(score, gameDatas) {
+  const socket = gameDatas.socket;
   gameDatas.score += score;
   socket.emit(SCORE_CHANGED, gameDatas.score);
   if (GAME_SYSTEM.isBestScoreUpdated(gameDatas)) {
@@ -125,7 +127,8 @@ function updateAndEmitScoreChanged(score, gameDatas, socket) {
   }
 }
 
-function checkGameStatusAfterCombined(socket, gameDatas) {
+function checkGameStatusAfterCombined(gameDatas) {
+  const socket = gameDatas.socket;
   const isGameOver = gameDatas.emptyCardsMap.size == 0;
   if (isGameOver) {
     gameDatas.gameState = 'GameOver';

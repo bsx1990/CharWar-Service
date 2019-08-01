@@ -19,6 +19,8 @@ const CHAR_CARDS_GENERATE_RATE = CONFIG.CHAR_CARDS_GENERATE_RATE;
 const MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD = CONFIG.MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD;
 const SKILL_NAMES = CONFIG.skillNames;
 const PLAY_SKILL = CONFIG.responseType.playSkill;
+const SKILL_PRIORITY = CONFIG.skillPriority;
+const SKILL_TYPE = CONFIG.skillType;
 
 module.exports = {
   GAME_MODES,
@@ -41,6 +43,8 @@ module.exports = {
   MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD,
   SKILL_NAMES,
   PLAY_SKILL,
+  SKILL_PRIORITY,
+  SKILL_TYPE,
 
   appendRandomCandidateCard: (numberCardsMap, candidateCards) => {
     DATAS_SYSTEM.appendRandomCandidateCard(numberCardsMap, candidateCards);
@@ -60,8 +64,8 @@ module.exports = {
   emitGameDatas: socket => {
     DATAS_SYSTEM.emitGameDatas(socket);
   },
-  changeGameMode: (token, mode) => {
-    DATAS_SYSTEM.setCurrentGameMode(token, mode);
+  changeGameMode: (socket, mode) => {
+    DATAS_SYSTEM.setCurrentGameMode(socket, mode);
   },
   getTokenBySocket: socket => {
     return socket.handshake.query.token;
@@ -75,8 +79,8 @@ module.exports = {
   createCard: (rowIndex, columnIndex, value) => {
     return DATAS_SYSTEM.createCard(rowIndex, columnIndex, value);
   },
-  setNumberCard: (token, card) => {
-    DATAS_SYSTEM.setNumberCard(token, card);
+  setNumberCard: (gameDatas, card) => {
+    DATAS_SYSTEM.setNumberCard(gameDatas, card);
   },
   generateRandomValue: (minValue, maxValue) => {
     return DATAS_SYSTEM.generateRandomValue(minValue, maxValue);
@@ -90,8 +94,8 @@ module.exports = {
   getRandomCharValue: () => {
     return DATAS_SYSTEM.getRandomCharValue();
   },
-  setCharCard: (token, card) => {
-    DATAS_SYSTEM.setCharCard(token, card);
+  setCharCard: (gameDatas, card) => {
+    DATAS_SYSTEM.setCharCard(gameDatas, card);
   },
   getSumOfCardValues: cards => {
     return SCORE_SYSTEM.getSumOfCardValues(cards);
@@ -107,6 +111,9 @@ module.exports = {
   },
   decreaseCard: card => {
     return DATAS_SYSTEM.decreaseCard(card);
+  },
+  checkGameStatusAfterCombined: gameDatas => {
+    return LOGIC_SYSTEM.checkGameStatusAfterCombined(gameDatas);
   }
 };
 

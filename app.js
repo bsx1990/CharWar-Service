@@ -34,7 +34,7 @@ IO.on('connection', function(socket) {
 
   socket.on(GAME_MODE_CHANGED, mode => {
     console.log(`received gameModeChanged request from token is:${socket.handshake.query.token}`);
-    GAME_SYSTEM.changeGameMode(GAME_SYSTEM.getTokenBySocket(socket), mode);
+    GAME_SYSTEM.changeGameMode(socket, mode);
   });
 });
 

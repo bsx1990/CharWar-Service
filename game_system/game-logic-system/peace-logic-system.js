@@ -2,22 +2,20 @@ module.exports = {
   clickCard
 };
 
-function clickCard(socket, rowIndex, columnIndex) {
-  const token = GAME_SYSTEM.getTokenBySocket(socket);
-  const gameDatas = GAME_SYSTEM.getGameDatasByToken(token);
-
+function clickCard(gameDatas, rowIndex, columnIndex) {
   let playgroundCards = gameDatas.playgroundCards;
   const hasCardAtClickedPosition = playgroundCards[rowIndex][columnIndex] != null;
   if (hasCardAtClickedPosition) {
     return;
   }
 
-  const currentCard = GAME_SYSTEM.createCard(rowIndex, columnIndex, gameDatas.candidateCards.shift());
-  LOGIC_SYSTEM.placeCardsBeforeCombinCards(socket, gameDatas, currentCard, token);
+  const clickedCard = GAME_SYSTEM.getCardFromGameDatas(gameDatas, rowIndex, columnIndex);
+  clickedCard.value = gameDatas.candidateCards.shift();
+  LOGIC_SYSTEM.placeCardsBeforeCombinCards(gameDatas, clickedCard);
 
-  const combinedInfor = LOGIC_SYSTEM.combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(socket, gameDatas, currentCard);
-  LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas, socket);
-  LOGIC_SYSTEM.checkGameStatusAfterCombined(socket, gameDatas);
+  const combinedInfor = LOGIC_SYSTEM.combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(gameDatas, clickedCard);
+  LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas);
+  LOGIC_SYSTEM.checkGameStatusAfterCombined(gameDatas);
 }
 
 const GAME_SYSTEM = require('../game-system');
