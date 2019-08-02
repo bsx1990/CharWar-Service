@@ -1,11 +1,12 @@
 module.exports = {
-  getDefaultCards: getDefaultCards,
-  getRandomEmptyCard: getRandomEmptyCard
+  getDefaultCards,
+  getRandomEmptyCard
 };
 
 let gameDatasSystem = require('./game-datas-system');
 const PLAYGROUND_SIZE = gameDatasSystem.PLAYGROUND_SIZE;
 const DEFAULT_EMPTY_CARD_VALUE = null;
+const recordError = gameDatasSystem.recordError;
 
 function getDefaultCards() {
   let emptyCardsMap = new Map();
@@ -30,7 +31,7 @@ function getRandomEmptyCard(emptyCardsMap) {
   const cardKey = keys[random];
   const card = emptyCardsMap.get(cardKey);
   if (card == null) {
-    console.log(`error, maxValue:${maxValue}, random:${random}, cardKey:${cardKey}`);
+    recordError(`error, maxValue:${maxValue}, random:${random}, cardKey:${cardKey}`);
   }
 
   emptyCardsMap.delete(card.key);

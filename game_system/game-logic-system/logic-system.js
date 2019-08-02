@@ -1,10 +1,34 @@
+const GAME_SYSTEM = require('../game-system');
+const GAME_MODES = GAME_SYSTEM.GAME_MODES;
+const ALL_AROUND_ARROW = GAME_SYSTEM.ALL_AROUND_ARROW;
+const PLAYGROUND_CARDS_CHANGED = GAME_SYSTEM.PLAYGROUND_CARDS_CHANGED;
+const CANDIDATE_CARDS_CHANGED = GAME_SYSTEM.CANDIDATE_CARDS_CHANGED;
+const SCORE_CHANGED = GAME_SYSTEM.SCORE_CHANGED;
+const BEST_SCORE_CHANGED = GAME_SYSTEM.BEST_SCORE_CHANGED;
+const MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD = GAME_SYSTEM.MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD;
+const PLAY_SKILL = GAME_SYSTEM.PLAY_SKILL;
+const GAME_STATE_CHANGED = GAME_SYSTEM.GAME_STATE_CHANGED;
+const SKILL_TYPE = GAME_SYSTEM.SKILL_TYPE;
+const recordInfor = GAME_SYSTEM.recordInfor;
+const recordError = GAME_SYSTEM.recordError;
+const recordObject = GAME_SYSTEM.recordObject;
+
 module.exports = {
   clickCard,
   replay,
   placeCardsBeforeCombinCards,
   combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor,
   updateAndEmitScoreChanged,
-  checkGameStatusAfterCombined
+  checkGameStatusAfterCombined,
+  recordGameDatasToLog,
+  recordInfor,
+  recordError,
+  recordObject,
+  MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD,
+  PLAY_SKILL,
+  PLAYGROUND_CARDS_CHANGED,
+  GAME_STATE_CHANGED,
+  SKILL_TYPE
 };
 
 function clickCard(socket, rowIndex, columnIndex) {
@@ -23,10 +47,10 @@ function clickCard(socket, rowIndex, columnIndex) {
 function getLogicHandler(gameMode) {
   switch (gameMode) {
     case GAME_MODES.peace:
-      console.log('Using PEACE_LOGIC_SYSTEM');
+      recordInfor('Using PEACE_LOGIC_SYSTEM');
       return PEACE_LOGIC_SYSTEM;
     case GAME_MODES.war:
-      console.log('Using WAR_LOGIC_SYSTEM');
+      recordInfor('Using WAR_LOGIC_SYSTEM');
       return WAR_LOGIC_SYSTEM;
     default:
       return null;
@@ -34,6 +58,7 @@ function getLogicHandler(gameMode) {
 }
 
 function placeCardsBeforeCombinCards(gameDatas, currentCard) {
+  currentCard.value = gameDatas.candidateCards.shift();
   generateNewCandidateCardsAndEmitChange(gameDatas);
   placeCardAtClickedPositionAndEmitChange(gameDatas, currentCard);
 }
@@ -132,7 +157,7 @@ function checkGameStatusAfterCombined(gameDatas) {
   const isGameOver = gameDatas.emptyCardsMap.size == 0;
   if (isGameOver) {
     gameDatas.gameState = 'GameOver';
-    console.log(`GAME OVER! request id: ${socket.id}, token is:${GAME_SYSTEM.getTokenBySocket(socket)}`);
+    recordInfor(`GAME OVER! request id: ${socket.id}, token is:${GAME_SYSTEM.getTokenBySocket(socket)}`);
     socket.emit(GAME_STATE_CHANGED, gameDatas.gameState);
   }
 }
@@ -141,14 +166,16 @@ function replay(socket) {
   GAME_SYSTEM.resetGameDatas(socket);
 }
 
-const GAME_SYSTEM = require('../game-system');
-const GAME_MODES = GAME_SYSTEM.GAME_MODES;
-const ALL_AROUND_ARROW = GAME_SYSTEM.ALL_AROUND_ARROW;
-const PLAYGROUND_CARDS_CHANGED = GAME_SYSTEM.PLAYGROUND_CARDS_CHANGED;
-const CANDIDATE_CARDS_CHANGED = GAME_SYSTEM.CANDIDATE_CARDS_CHANGED;
-const SCORE_CHANGED = GAME_SYSTEM.SCORE_CHANGED;
-const BEST_SCORE_CHANGED = GAME_SYSTEM.BEST_SCORE_CHANGED;
-const GAME_STATE_CHANGED = GAME_SYSTEM.GAME_STATE_CHANGED;
+function recordGameDatasToLog(gameDatas) {
+  recordInfor(`current game datas for token:${gameDatas.token}`);
+  recordInfor('    playground cards:');
+  recordObject(gameDatas.playgroundCards);
+  recordInfor(`    score:${gameDatas.score}, bestScore:${gameDatas.bestScore}`);
+  recordInfor(`    game state:${gameDatas.gameState}`);
+  recordInfor('    combined skills:');
+  recordObject(gameDatas.combinedSkills);
+  recordInfor('    end');
+}
 
 const PEACE_LOGIC_SYSTEM = require('./peace-logic-system');
 const WAR_LOGIC_SYSTEM = require('./war-logic-system');

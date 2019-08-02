@@ -6,6 +6,8 @@ const GAME_SYSTEM = require('./game-system');
 const SKILL_NAMES = GAME_SYSTEM.SKILL_NAMES;
 const SKILL_PRIORITY = GAME_SYSTEM.SKILL_PRIORITY;
 const SKILL_TYPE = GAME_SYSTEM.SKILL_TYPE;
+const recordInfor = GAME_SYSTEM.recordInfor;
+const recordObject = GAME_SYSTEM.recordObject;
 
 const critsScoreSkill = {
   name: SKILL_NAMES.critsScoreSkill,
@@ -67,21 +69,23 @@ const numberAttackSkill = {
     return combinedInfor.totalCountOfCards > 0 && gameDatas.charCardsMap.size > 0;
   },
   execute: (clickedCard, gameDatas) => {
+    recordInfor('begin number attack skill execute');
     clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
     GAME_SYSTEM.setCharCard(gameDatas, clickedCard);
     gameDatas.gameState = null;
     GAME_SYSTEM.emitGameDatas(gameDatas.socket);
     GAME_SYSTEM.checkGameStatusAfterCombined(gameDatas);
+    recordInfor('end number attack skill execute');
   }
 };
 
 const ALL_SKILLS = [critsScoreSkill, critsScore3TimesSkill, critsScore5TimesSkill, critsScore10TimesSkill, numberAttackSkill];
+const PRIORITY_SKILLS = splitAllSkillsIntoDifferentPriority(ALL_SKILLS);
 
 function getCanExecutedCombinedSkills(combinedInfor, gameDatas) {
   var result = [];
 
-  const skills = splitAllSkillsIntoDifferentPriority(ALL_SKILLS);
-  skills.forEach(samePrioritySkills => {
+  PRIORITY_SKILLS.forEach(samePrioritySkills => {
     samePrioritySkills.forEach(skill => {
       if (skill.canExecute(combinedInfor, gameDatas)) {
         result.push(skill);

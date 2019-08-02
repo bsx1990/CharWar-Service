@@ -1,7 +1,7 @@
 module.exports = {
-  getDefaultCards: getDefaultCards,
-  getRandomCharValue: getRandomCharValue,
-  decreaseValue: decreaseValue
+  getDefaultCards,
+  getRandomCharValue,
+  decreaseValue
 };
 
 let gameDatasSystem = require('./game-datas-system');

@@ -9,12 +9,18 @@ const GAME_STATE_CHANGED = GAME_SYSTEM.GAME_STATE_CHANGED;
 const GAME_MODES = GAME_SYSTEM.GAME_MODES;
 const EACH_CHAR_CARD_GENERATE_RATE = GAME_SYSTEM.EACH_CHAR_CARD_GENERATE_RATE;
 const CHAR_CARD_TYPE = GAME_SYSTEM.CHAR_CARD_TYPE;
+const recordInfor = GAME_SYSTEM.recordInfor;
+const recordError = GAME_SYSTEM.recordError;
+const recordObject = GAME_SYSTEM.recordObject;
 
 module.exports = {
   MAX_GENERATED_CARD,
   PLAYGROUND_SIZE,
   EACH_CHAR_CARD_GENERATE_RATE,
   CHAR_CARD_TYPE,
+  recordInfor,
+  recordError,
+  recordObject,
 
   getMaxCardValue: numberCardsMap => {
     return numberCardsSystem.getMaxCardValue(numberCardsMap);
@@ -51,11 +57,14 @@ let identifyAndGameDatasrequestMapping = new Map();
 let tokenAndGameModeMapping = new Map();
 
 function appendRandomCandidateCard(numberCardsMap, candidateCards) {
+  recordInfor('begin append random candidate card');
   const currentMaxCardValue = numberCardsSystem.getMaxCardValue(numberCardsMap);
   candidateCardsSystem.appendRandomCandidateCard(candidateCards, currentMaxCardValue);
+  recordInfor('end append random candidate card');
 }
 
 function initDatas(socket) {
+  recordInfor(`begain init datas for token:${socket.token}`);
   const defaultNumerCardsMap = numberCardsSystem.getDefaultCards();
   const defaultCharCardsMap = charCardsSystem.getDefaultCards();
   const defaultEmptyCardsMap = emptyCardsSystem.getDefaultCards();
@@ -63,6 +72,7 @@ function initDatas(socket) {
   const gameDatas = createGameDatas(defaultNumerCardsMap, defaultCharCardsMap, defaultEmptyCardsMap, defaultCandidateCards, socket);
   appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
   appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
+  recordInfor(`begain init datas for token:${socket.token}`);
   return gameDatas;
 }
 
@@ -84,7 +94,7 @@ function createGameDatas(defaultNumerCardsMap, defaultCharCardsMap, defaultEmpty
 
 function generateRandomValue(minValue, maxValue) {
   const result = Math.trunc(Math.random() * maxValue + minValue);
-  console.log(`generate random value between minValue:${minValue} and maxValue:${maxValue}, result:${result}`);
+  recordInfor(`generate random value between minValue:${minValue} and maxValue:${maxValue}, result:${result}`);
   return result;
 }
 
@@ -107,10 +117,12 @@ function getGameDatasByToken(token) {
 }
 
 function resetGameDatas(socket) {
+  recordInfor('begin reset game datas');
   const token = GAME_SYSTEM.getTokenBySocket(socket);
   const identify = getIdentifyByToken(token);
   identifyAndGameDatasrequestMapping.set(identify, initDatas(socket));
   emitGameDatas(socket);
+  recordInfor('end reset game datas');
 }
 
 function emitGameDatas(socket) {
@@ -217,11 +229,17 @@ function getCardFromGameDatas(gameDatas, rowIndex, columnIndex) {
 }
 
 function decreaseCard(card) {
+  recordInfor('begin to decrease card, current card:');
+  recordObject(card);
   let cardValue = card.value;
   if (cardValue == null) {
+    recordError('end decrease card. card value is null');
     return null;
   }
 
   cardValue = isNaN(cardValue) ? charCardsSystem.decreaseValue(cardValue) : numberCardsSystem.decreaseValue(cardValue);
-  return createCard(card.row, card.column, cardValue);
+  let result = createCard(card.row, card.column, cardValue);
+  recordInfor('card after decrease:');
+  recordObject(result);
+  return result;
 }

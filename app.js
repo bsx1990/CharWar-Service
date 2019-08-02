@@ -6,36 +6,38 @@ const GET_DATA = GAME_SYSTEM.GET_DATA;
 const CLICK_CARD = GAME_SYSTEM.CLICK_CARD;
 const REPLAY = GAME_SYSTEM.REPLAY;
 const GAME_MODE_CHANGED = GAME_SYSTEM.GAME_MODE_CHANGED;
+const recordInfor = GAME_SYSTEM.recordInfor;
+const recordError = GAME_SYSTEM.recordError;
 
 APP.listen(GAME_SYSTEM.PORT);
 
 IO.on('connection', function(socket) {
   let token = GAME_SYSTEM.getTokenBySocket(socket);
-  console.log(`received connection request, request id: ${socket.id}, token is:${token}`);
+  recordInfor(`received connection request, request id: ${socket.id}, token is:${token}`);
   if (token == undefined || token == null) {
-    console.log('token is empth, exit.');
+    recordError('token is empth, exit.');
     return;
   }
 
   socket.on(GET_DATA, () => {
-    console.log(`received getData request, request id: ${socket.id}, token is:${GAME_SYSTEM.getTokenBySocket(socket)}`);
+    recordInfor(`received getData request, request id: ${socket.id}, token is:${GAME_SYSTEM.getTokenBySocket(socket)}`);
     GAME_SYSTEM.emitGameDatas(socket);
   });
 
   socket.on(CLICK_CARD, (rowIndex, columnIndex) => {
-    console.log(`received clickCard request from token is:${GAME_SYSTEM.getTokenBySocket(socket)}, rowIndex:${rowIndex} columnIndex:${columnIndex}`);
+    recordInfor(`received clickCard request from token is:${GAME_SYSTEM.getTokenBySocket(socket)}, rowIndex:${rowIndex} columnIndex:${columnIndex}`);
     GAME_SYSTEM.clickCard(socket, rowIndex, columnIndex);
   });
 
   socket.on(REPLAY, () => {
-    console.log(`received replay request from token is:${GAME_SYSTEM.getTokenBySocket(socket)}`);
+    recordInfor(`received replay request from token is:${GAME_SYSTEM.getTokenBySocket(socket)}`);
     GAME_SYSTEM.replay(socket);
   });
 
   socket.on(GAME_MODE_CHANGED, mode => {
-    console.log(`received gameModeChanged request from token is:${socket.handshake.query.token}`);
+    recordInfor(`received gameModeChanged request from token is:${socket.handshake.query.token}`);
     GAME_SYSTEM.changeGameMode(socket, mode);
   });
 });
 
-console.log('app listen at:' + GAME_SYSTEM.PORT);
+recordInfor('app listen at:' + GAME_SYSTEM.PORT);

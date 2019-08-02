@@ -114,6 +114,15 @@ module.exports = {
   },
   checkGameStatusAfterCombined: gameDatas => {
     return LOGIC_SYSTEM.checkGameStatusAfterCombined(gameDatas);
+  },
+  recordInfor: text => {
+    LOG_SYSTEM.infor(text);
+  },
+  recordError: text => {
+    LOG_SYSTEM.error(text);
+  },
+  recordObject: obj => {
+    LOG_SYSTEM.object(obj);
   }
 };
 
@@ -121,3 +130,4 @@ let DATAS_SYSTEM = require('./game_datas_system/game-datas-system');
 let LOGIC_SYSTEM = require('./game-logic-system/logic-system');
 let SCORE_SYSTEM = require('./score-system');
 let SKILL_SYSTEM = require('./combine-skill-system');
+let LOG_SYSTEM = require('./log-system');

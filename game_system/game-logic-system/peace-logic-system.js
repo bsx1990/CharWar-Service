@@ -10,12 +10,13 @@ function clickCard(gameDatas, rowIndex, columnIndex) {
   }
 
   const clickedCard = GAME_SYSTEM.getCardFromGameDatas(gameDatas, rowIndex, columnIndex);
-  clickedCard.value = gameDatas.candidateCards.shift();
   LOGIC_SYSTEM.placeCardsBeforeCombinCards(gameDatas, clickedCard);
 
   const combinedInfor = LOGIC_SYSTEM.combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(gameDatas, clickedCard);
   LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas);
   LOGIC_SYSTEM.checkGameStatusAfterCombined(gameDatas);
+
+  LOGIC_SYSTEM.recordGameDatasToLog(gameDatas);
 }
 
 const GAME_SYSTEM = require('../game-system');

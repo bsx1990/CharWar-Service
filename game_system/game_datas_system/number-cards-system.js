@@ -1,14 +1,19 @@
 module.exports = {
-  getMaxCardValue: getMaxCardValue,
-  getDefaultCards: getDefaultCards,
-  decreaseValue: decreaseValue
+  getMaxCardValue,
+  getDefaultCards,
+  decreaseValue
 };
+
+let gameDatasSystem = require('./game-datas-system');
+const recordInfor = gameDatasSystem.recordInfor;
+const recordError = gameDatasSystem.recordError;
+const recordObject = gameDatasSystem.recordObject;
 
 function getMaxCardValue(numberCardsMap) {
   let maxCard = 0;
   const isNumberCardsEmpty = numberCardsMap.size == 0;
   if (isNumberCardsEmpty) {
-    console.log(`number cards is empty, max card value is ${maxCard}`);
+    recordInfor(`number cards is empty, max card value is ${maxCard}`);
     return maxCard;
   }
 
@@ -18,12 +23,12 @@ function getMaxCardValue(numberCardsMap) {
   maxCard = Math.max.apply(Math, values);
 
   if (isNaN(maxCard)) {
-    console.log(`got error when get max value from number cards, max card value is ${maxCard}, cards:`);
-    console.log(numberCardsMap);
+    recordError(`got error when get max value from number cards, max card value is ${maxCard}, cards:`);
+    recordObject(numberCardsMap);
     maxCard = 0;
   }
 
-  console.log(`max card value is ${maxCard}`);
+  recordInfor(`max card value is ${maxCard}`);
   return maxCard;
 }
 

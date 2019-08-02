@@ -12,14 +12,17 @@ function clickCard(gameDatas, rowIndex, columnIndex) {
 
   if (needResponseSkill && hasCardAtClickedPosition) {
     responseSkill(gameDatas, clickedCard);
+    if (gameDatas.combinedSkills.legth == 0) {
+      gameDatas.gameState = null;
+    }
     return;
   }
 
   if ((needResponseSkill && !hasCardAtClickedPosition) || (!needResponseSkill && hasCardAtClickedPosition)) {
+    recordInfor(`need response skill:${needResponseSkill}, has card at clicked position:${hasCardAtClickedPosition}`);
     return;
   }
 
-  clickedCard.value = gameDatas.candidateCards.shift();
   LOGIC_SYSTEM.placeCardsBeforeCombinCards(gameDatas, clickedCard);
 
   let canGenerateCharCard = canGenerateRandomCharCard(emptyCardsMap, numberCardsMap);
@@ -34,17 +37,28 @@ function clickCard(gameDatas, rowIndex, columnIndex) {
     LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas);
     LOGIC_SYSTEM.checkGameStatusAfterCombined(gameDatas);
   }
+
+  LOGIC_SYSTEM.recordGameDatasToLog(gameDatas);
 }
 
 function responseSkill(gameDatas, clickedCard) {
+  recordInfor('begin response skill');
   if (clickedCard == null) {
+    recordError('end response skill. clicked card is null');
     return;
   }
 
-  while (gameDatas.combinedSkills.legth > 0) {
+  const skills = gameDatas.combinedSkills;
+  recordInfor(`game combined skills length is:${skills.length} are:`);
+  recordObject(skills);
+
+  while (skills.length > 0) {
     const skill = gameDatas.combinedSkills.shift();
+    recordInfor('current skill is:');
+    recordObject(skill);
     skill.execute(clickedCard, gameDatas);
   }
+  recordInfor('end response skill');
 }
 
 function canGenerateRandomCharCard(emptyCardsMap, numberCardsMap) {
@@ -87,8 +101,11 @@ function executeCombinedSkill(combinedInfor, gameDatas) {
 
 const GAME_SYSTEM = require('../game-system');
 const LOGIC_SYSTEM = require('./logic-system');
-const MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD = GAME_SYSTEM.MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD;
-const PLAY_SKILL = GAME_SYSTEM.PLAY_SKILL;
-const PLAYGROUND_CARDS_CHANGED = GAME_SYSTEM.PLAYGROUND_CARDS_CHANGED;
-const GAME_STATE_CHANGED = GAME_SYSTEM.GAME_STATE_CHANGED;
-const SKILL_TYPE = GAME_SYSTEM.SKILL_TYPE;
+const MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD = LOGIC_SYSTEM.MIN_CARD_VALUE_LIMIT_FOR_GENERATE_CHAR_CARD;
+const PLAY_SKILL = LOGIC_SYSTEM.PLAY_SKILL;
+const PLAYGROUND_CARDS_CHANGED = LOGIC_SYSTEM.PLAYGROUND_CARDS_CHANGED;
+const GAME_STATE_CHANGED = LOGIC_SYSTEM.GAME_STATE_CHANGED;
+const SKILL_TYPE = LOGIC_SYSTEM.SKILL_TYPE;
+const recordInfor = LOGIC_SYSTEM.recordInfor;
+const recordError = LOGIC_SYSTEM.recordError;
+const recordObject = LOGIC_SYSTEM.recordObject;
