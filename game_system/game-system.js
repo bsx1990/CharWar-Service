@@ -123,6 +123,12 @@ module.exports = {
   },
   recordObject: obj => {
     LOG_SYSTEM.object(obj);
+  },
+  recordNoPrefixLog: text => {
+    LOG_SYSTEM.noPrefix(text);
+  },
+  getPrintedGameDatas: gameDatas => {
+    return DATAS_SYSTEM.getPrintedGameDatas(gameDatas);
   }
 };
 

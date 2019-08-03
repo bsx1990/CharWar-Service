@@ -1,7 +1,8 @@
 module.exports = {
   infor,
   error,
-  object
+  object,
+  noPrefix
 };
 
 function infor(text) {
@@ -14,4 +15,8 @@ function error(text) {
 
 function object(obj) {
   console.log(obj);
+}
+
+function noPrefix(text) {
+  console.log(text);
 }

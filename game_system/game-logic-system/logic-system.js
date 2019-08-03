@@ -12,6 +12,7 @@ const SKILL_TYPE = GAME_SYSTEM.SKILL_TYPE;
 const recordInfor = GAME_SYSTEM.recordInfor;
 const recordError = GAME_SYSTEM.recordError;
 const recordObject = GAME_SYSTEM.recordObject;
+const recordNoPrefixLog = GAME_SYSTEM.recordNoPrefixLog;
 
 module.exports = {
   clickCard,
@@ -167,14 +168,8 @@ function replay(socket) {
 }
 
 function recordGameDatasToLog(gameDatas) {
-  recordInfor(`current game datas for token:${gameDatas.token}`);
-  recordInfor('    playground cards:');
-  recordObject(gameDatas.playgroundCards);
-  recordInfor(`    score:${gameDatas.score}, bestScore:${gameDatas.bestScore}`);
-  recordInfor(`    game state:${gameDatas.gameState}`);
-  recordInfor('    combined skills:');
-  recordObject(gameDatas.combinedSkills);
-  recordInfor('    end');
+  recordNoPrefixLog(`[GAME_DATAS] current game datas for token:${gameDatas.token}`);
+  recordObject(GAME_SYSTEM.getPrintedGameDatas(gameDatas));
 }
 
 const PEACE_LOGIC_SYSTEM = require('./peace-logic-system');

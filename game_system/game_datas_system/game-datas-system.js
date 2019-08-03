@@ -44,7 +44,8 @@ module.exports = {
   setNumberCard,
   setCharCard,
   getCardFromGameDatas,
-  decreaseCard
+  decreaseCard,
+  getPrintedGameDatas
 };
 
 let candidateCardsSystem = require('./candidate-cards-system');
@@ -242,4 +243,19 @@ function decreaseCard(card) {
   recordInfor('card after decrease:');
   recordObject(result);
   return result;
+}
+
+function getPrintedGameDatas(gameDatas) {
+  return {
+    token: gameDatas.token,
+    numberCardsMap: gameDatas.numberCardsMap,
+    charCardsMap: gameDatas.charCardsMap,
+    emptyCardsMap: gameDatas.emptyCardsMap,
+    playgroundCards: gameDatas.playgroundCards,
+    candidateCards: gameDatas.candidateCards,
+    score: gameDatas.score,
+    bestScore: gameDatas.bestScore,
+    gameState: gameDatas.gameState,
+    combinedSkills: gameDatas.combinedSkills
+  };
 }
