@@ -79,9 +79,6 @@ module.exports = {
   createCard: (rowIndex, columnIndex, value) => {
     return DATAS_SYSTEM.createCard(rowIndex, columnIndex, value);
   },
-  setNumberCard: (gameDatas, card) => {
-    DATAS_SYSTEM.setNumberCard(gameDatas, card);
-  },
   generateRandomValue: (minValue, maxValue) => {
     return DATAS_SYSTEM.generateRandomValue(minValue, maxValue);
   },
@@ -94,8 +91,8 @@ module.exports = {
   getRandomCharValue: () => {
     return DATAS_SYSTEM.getRandomCharValue();
   },
-  setCharCard: (gameDatas, card) => {
-    DATAS_SYSTEM.setCharCard(gameDatas, card);
+  setCard: (gameDatas, card) => {
+    DATAS_SYSTEM.setCard(gameDatas, card);
   },
   getSumOfCardValues: cards => {
     return SCORE_SYSTEM.getSumOfCardValues(cards);

@@ -41,8 +41,7 @@ module.exports = {
   getGameModeByToken,
   getCardKeyByRowAndColumn,
   createCard,
-  setNumberCard,
-  setCharCard,
+  setCard,
   getCardFromGameDatas,
   decreaseCard,
   getPrintedGameDatas
@@ -56,6 +55,12 @@ let playgroundCardsSystem = require('./playground-cards-system');
 
 let identifyAndGameDatasrequestMapping = new Map();
 let tokenAndGameModeMapping = new Map();
+
+const cardType = {
+  empty: 'Empty',
+  number: 'Number',
+  char: 'Char'
+};
 
 function appendRandomCandidateCard(numberCardsMap, candidateCards) {
   recordInfor('begin append random candidate card');
@@ -177,35 +182,41 @@ function getGameModeByToken(token) {
   }
 }
 
-function setNumberCard(gameDatas, card) {
+function setCard(gameDatas, card) {
   let numberCardsMap = gameDatas.numberCardsMap;
-  let emptyCardsMap = gameDatas.emptyCardsMap;
-  let playgroundCards = gameDatas.playgroundCards;
-
-  if (card.value == undefined || card.value == null) {
-    moveCardFromMapToMap(card, numberCardsMap, emptyCardsMap);
-  } else {
-    moveCardFromMapToMap(card, emptyCardsMap, numberCardsMap);
-  }
-  playgroundCardsSystem.updatePlaygroundCardsByCard(playgroundCards, card);
-}
-
-function setCharCard(gameDatas, card) {
   let charCardsMap = gameDatas.charCardsMap;
   let emptyCardsMap = gameDatas.emptyCardsMap;
   let playgroundCards = gameDatas.playgroundCards;
 
-  if (card.value == undefined || card.value == null) {
-    moveCardFromMapToMap(card, charCardsMap, emptyCardsMap);
-  } else {
-    moveCardFromMapToMap(card, emptyCardsMap, charCardsMap);
+  const cardKey = card.key;
+  if (numberCardsMap.has(cardKey)) {
+    numberCardsMap.delete(cardKey);
   }
-  playgroundCardsSystem.updatePlaygroundCardsByCard(playgroundCards, card);
-}
+  if (charCardsMap.has(cardKey)) {
+    charCardsMap.delete(cardKey);
+  }
+  if (emptyCardsMap.has(cardKey)) {
+    emptyCardsMap.delete(cardKey);
+  }
 
-function moveCardFromMapToMap(card, fromMaps, toMaps) {
-  toMaps.set(card.key, card);
-  fromMaps.delete(card.key);
+  const currentCardType = getCardType(card);
+  switch (currentCardType) {
+    case cardType.empty:
+      emptyCardsMap.set(cardKey, card);
+      break;
+    case cardType.number:
+      numberCardsMap.set(cardKey, card);
+      break;
+    case cardType.char:
+      charCardsMap.set(cardKey, card);
+      break;
+    default:
+      recordError('unexcepted card type in setCard function, card:');
+      recordObject(card);
+      break;
+  }
+
+  playgroundCardsSystem.updatePlaygroundCardsByCard(playgroundCards, card);
 }
 
 function getCardFromGameDatas(gameDatas, rowIndex, columnIndex) {
@@ -232,17 +243,36 @@ function getCardFromGameDatas(gameDatas, rowIndex, columnIndex) {
 function decreaseCard(card) {
   recordInfor('begin to decrease card, current card:');
   recordObject(card);
-  let cardValue = card.value;
-  if (cardValue == null) {
-    recordError('end decrease card. card value is null');
-    return null;
+  let cardValue;
+
+  const currentCardType = getCardType(card);
+  recordInfor(`current card type is ${currentCardType}`);
+
+  switch (currentCardType) {
+    case cardType.empty:
+      recordError('end decrease card. card value is null');
+      return null;
+    case cardType.number:
+      cardValue = numberCardsSystem.decreaseValue(card.value);
+      break;
+    case cardType.char:
+      cardValue = charCardsSystem.decreaseValue(card.value);
+      break;
+    default:
+      recordError('unexcepted card type in decreaseCard. card:');
+      recordObject(card);
+      break;
   }
 
-  cardValue = isNaN(cardValue) ? charCardsSystem.decreaseValue(cardValue) : numberCardsSystem.decreaseValue(cardValue);
   let result = createCard(card.row, card.column, cardValue);
   recordInfor('card after decrease:');
   recordObject(result);
   return result;
+}
+
+function getCardType(card) {
+  let cardValue = card.value;
+  return cardValue == null ? cardType.empty : isNaN(cardValue) ? cardType.char : cardType.number;
 }
 
 function getPrintedGameDatas(gameDatas) {

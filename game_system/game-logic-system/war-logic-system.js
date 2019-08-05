@@ -75,7 +75,7 @@ function generateCharCard(emptyCardsMap, gameDatas) {
   let card = GAME_SYSTEM.getRandomEmptyCard(emptyCardsMap);
   card.value = GAME_SYSTEM.getRandomCharValue();
 
-  GAME_SYSTEM.setCharCard(gameDatas, card);
+  GAME_SYSTEM.setCard(gameDatas, card);
   socket.emit(PLAYGROUND_CARDS_CHANGED, gameDatas.playgroundCards);
 }
 

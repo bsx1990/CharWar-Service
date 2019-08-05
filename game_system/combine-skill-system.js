@@ -71,7 +71,7 @@ const numberAttackSkill = {
   execute: (clickedCard, gameDatas) => {
     recordInfor('begin number attack skill execute');
     clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
-    GAME_SYSTEM.setCharCard(gameDatas, clickedCard);
+    GAME_SYSTEM.setCard(gameDatas, clickedCard);
     gameDatas.gameState = null;
     GAME_SYSTEM.emitGameDatas(gameDatas.socket);
     GAME_SYSTEM.checkGameStatusAfterCombined(gameDatas);

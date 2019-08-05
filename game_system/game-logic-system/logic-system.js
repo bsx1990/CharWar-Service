@@ -70,7 +70,7 @@ function generateNewCandidateCardsAndEmitChange(gameDatas) {
 }
 
 function placeCardAtClickedPositionAndEmitChange(gameDatas, card) {
-  GAME_SYSTEM.setNumberCard(gameDatas, card);
+  GAME_SYSTEM.setCard(gameDatas, card);
   gameDatas.socket.emit(PLAYGROUND_CARDS_CHANGED, gameDatas.playgroundCards);
 }
 
@@ -129,10 +129,10 @@ function combineCards(gameDatas, cards, centerCard, combinedInformation) {
 
   cards.forEach(card => {
     card.value = null;
-    GAME_SYSTEM.setNumberCard(gameDatas, card);
+    GAME_SYSTEM.setCard(gameDatas, card);
   });
 
-  GAME_SYSTEM.setNumberCard(gameDatas, centerCard);
+  GAME_SYSTEM.setCard(gameDatas, centerCard);
 }
 
 function updateCombinedInforForSingleRound(combinedInformation, cardsOfThisRound, centerCard) {
