@@ -1,6 +1,6 @@
 module.exports = {
   getMaxCardValue,
-  getDefaultCards,
+  getEmptyCards,
   decreaseValue
 };
 
@@ -32,7 +32,7 @@ function getMaxCardValue(numberCardsMap) {
   return maxCard;
 }
 
-function getDefaultCards() {
+function getEmptyCards() {
   return new Map();
 }
 

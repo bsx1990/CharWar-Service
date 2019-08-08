@@ -1,5 +1,5 @@
 module.exports = {
-  getDefaultCards,
+  getEmptyCards,
   getRandomEmptyCard
 };
 
@@ -8,7 +8,7 @@ const PLAYGROUND_SIZE = gameDatasSystem.PLAYGROUND_SIZE;
 const DEFAULT_EMPTY_CARD_VALUE = null;
 const recordError = gameDatasSystem.recordError;
 
-function getDefaultCards() {
+function getEmptyCards() {
   let emptyCardsMap = new Map();
   for (let row = 0; row < PLAYGROUND_SIZE; row++) {
     for (let column = 0; column < PLAYGROUND_SIZE; column++) {
@@ -23,7 +23,7 @@ function getRandomEmptyCard(emptyCardsMap) {
   const minValue = 0;
   let maxValue = emptyCardsMap.size - 1;
   if (maxValue == 0) {
-    return null;
+    return emptyCardsMap.values().next().value;
   }
 
   const keys = Array.from(emptyCardsMap.keys());

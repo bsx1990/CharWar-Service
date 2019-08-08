@@ -1,5 +1,5 @@
 module.exports = {
-  getDefaultCards,
+  getEmptyCards,
   getRandomCharValue,
   decreaseValue
 };
@@ -11,7 +11,7 @@ const CARD_B_GENERATE_RATE = CHAR_CARD_GENERATE_RATE.cardB;
 const CARD_C_GENERATE_RATE = CHAR_CARD_GENERATE_RATE.cardC;
 const CHAR_CARD_TYPE = gameDatasSystem.CHAR_CARD_TYPE;
 
-function getDefaultCards() {
+function getEmptyCards() {
   return new Map();
 }
 

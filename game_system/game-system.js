@@ -61,8 +61,8 @@ module.exports = {
   resetGameDatas: socket => {
     DATAS_SYSTEM.resetGameDatas(socket);
   },
-  emitGameDatas: socket => {
-    DATAS_SYSTEM.emitGameDatas(socket);
+  emitGameDatas: gameDatas => {
+    DATAS_SYSTEM.emitGameDatas(gameDatas);
   },
   changeGameMode: (socket, mode) => {
     DATAS_SYSTEM.setCurrentGameMode(socket, mode);
@@ -126,6 +126,9 @@ module.exports = {
   },
   getPrintedGameDatas: gameDatas => {
     return DATAS_SYSTEM.getPrintedGameDatas(gameDatas);
+  },
+  clearAllCards: gameDatas => {
+    DATAS_SYSTEM.clearAllCards(gameDatas);
   }
 };
 

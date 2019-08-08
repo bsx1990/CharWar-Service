@@ -20,8 +20,10 @@ IO.on('connection', function(socket) {
   }
 
   socket.on(GET_DATA, () => {
-    recordInfor(`received getData request, request id: ${socket.id}, token is:${GAME_SYSTEM.getTokenBySocket(socket)}`);
-    GAME_SYSTEM.emitGameDatas(socket);
+    const token = GAME_SYSTEM.getTokenBySocket(socket);
+    const gameDatas = GAME_SYSTEM.getGameDatasByToken(token);
+    recordInfor(`received getData request, request id: ${socket.id}, token is:${token}`);
+    GAME_SYSTEM.emitGameDatas(gameDatas);
   });
 
   socket.on(CLICK_CARD, (rowIndex, columnIndex) => {

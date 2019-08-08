@@ -44,7 +44,8 @@ module.exports = {
   setCard,
   getCardFromGameDatas,
   decreaseCard,
-  getPrintedGameDatas
+  getPrintedGameDatas,
+  clearAllCards
 };
 
 let candidateCardsSystem = require('./candidate-cards-system');
@@ -71,15 +72,24 @@ function appendRandomCandidateCard(numberCardsMap, candidateCards) {
 
 function initDatas(socket) {
   recordInfor(`begain init datas for token:${socket.token}`);
-  const defaultNumerCardsMap = numberCardsSystem.getDefaultCards();
-  const defaultCharCardsMap = charCardsSystem.getDefaultCards();
-  const defaultEmptyCardsMap = emptyCardsSystem.getDefaultCards();
-  const defaultCandidateCards = candidateCardsSystem.getDefaultCards();
+  const defaultNumerCardsMap = numberCardsSystem.getEmptyCards();
+  const defaultCharCardsMap = charCardsSystem.getEmptyCards();
+  const defaultEmptyCardsMap = emptyCardsSystem.getEmptyCards();
+  const defaultCandidateCards = candidateCardsSystem.getEmptyCards();
   const gameDatas = createGameDatas(defaultNumerCardsMap, defaultCharCardsMap, defaultEmptyCardsMap, defaultCandidateCards, socket);
   appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
   appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
   recordInfor(`begain init datas for token:${socket.token}`);
   return gameDatas;
+}
+
+function clearAllCards(gameDatas) {
+  gameDatas.numberCardsMap.clear();
+  gameDatas.charCardsMap.clear();
+  gameDatas.emptyCardsMap = emptyCardsSystem.getEmptyCards();
+  gameDatas.candidateCards = candidateCardsSystem.getEmptyCards();
+  appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
+  appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
 }
 
 function createGameDatas(defaultNumerCardsMap, defaultCharCardsMap, defaultEmptyCardsMap, defaultCandidateCards, socket) {
@@ -127,17 +137,18 @@ function resetGameDatas(socket) {
   const token = GAME_SYSTEM.getTokenBySocket(socket);
   const identify = getIdentifyByToken(token);
   identifyAndGameDatasrequestMapping.set(identify, initDatas(socket));
-  emitGameDatas(socket);
+  const gameDatas = GAME_SYSTEM.getGameDatasByToken(token);
+  emitGameDatas(gameDatas);
   recordInfor('end reset game datas');
 }
 
-function emitGameDatas(socket) {
-  const gameDatas = GAME_SYSTEM.getGameDatasByToken(GAME_SYSTEM.getTokenBySocket(socket));
+function emitGameDatas(gameDatas) {
   const playgroundCards = gameDatas.playgroundCards;
   const candidateCards = gameDatas.candidateCards;
   const score = gameDatas.score;
   const bestScore = gameDatas.bestScore;
   const gameState = gameDatas.gameState;
+  const socket = gameDatas.socket;
 
   socket.emit(PLAYGROUND_CARDS_CHANGED, playgroundCards);
   socket.emit(CANDIDATE_CARDS_CHANGED, candidateCards);

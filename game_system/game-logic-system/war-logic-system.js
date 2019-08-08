@@ -11,7 +11,7 @@ function clickCard(gameDatas, rowIndex, columnIndex) {
   const clickedCard = GAME_SYSTEM.getCardFromGameDatas(gameDatas, rowIndex, columnIndex);
 
   if (needResponseSkill && hasCardAtClickedPosition) {
-    responseSkill(gameDatas, clickedCard);
+    executeNeedResponsedSkill(gameDatas, clickedCard);
     if (gameDatas.combinedSkills.legth == 0) {
       gameDatas.gameState = null;
     }
@@ -41,7 +41,7 @@ function clickCard(gameDatas, rowIndex, columnIndex) {
   LOGIC_SYSTEM.recordGameDatasToLog(gameDatas);
 }
 
-function responseSkill(gameDatas, clickedCard) {
+function executeNeedResponsedSkill(gameDatas, clickedCard) {
   recordInfor('begin response skill');
   if (clickedCard == null) {
     recordError('end response skill. clicked card is null');
@@ -86,7 +86,7 @@ function executeCombinedSkill(combinedInfor, gameDatas) {
     socket.emit(PLAY_SKILL, skill.name);
 
     if (skill.type == SKILL_TYPE.noResponse) {
-      skill.execute(combinedInfor);
+      skill.execute(combinedInfor, gameDatas);
       LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas);
       LOGIC_SYSTEM.checkGameStatusAfterCombined(gameDatas);
     } else {
