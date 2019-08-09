@@ -54,6 +54,7 @@ function getLogicHandler(gameMode) {
       recordInfor('Using WAR_LOGIC_SYSTEM');
       return WAR_LOGIC_SYSTEM;
     default:
+      recordError(`wrong gameMode:${gameMode}`);
       return null;
   }
 }

@@ -105,17 +105,17 @@ const PRIORITY_SKILLS = splitAllSkillsIntoDifferentPriority(ALL_SKILLS);
 function getCanExecutedCombinedSkills(combinedInfor, gameDatas) {
   var result = [];
 
-  PRIORITY_SKILLS.forEach(samePrioritySkills => {
+  for (const samePrioritySkills of PRIORITY_SKILLS) {
     samePrioritySkills.forEach(skill => {
       if (skill.canExecute(combinedInfor, gameDatas)) {
         result.push(skill);
       }
     });
 
-    if (combinedInfor.skills.length > 0) {
-      return false;
+    if (result.length > 0) {
+      break;
     }
-  });
+  }
 
   result = removeBlockedSkills(result);
 

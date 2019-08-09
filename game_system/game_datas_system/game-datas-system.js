@@ -71,7 +71,7 @@ function appendRandomCandidateCard(numberCardsMap, candidateCards) {
 }
 
 function initDatas(socket) {
-  recordInfor(`begain init datas for token:${socket.token}`);
+  recordInfor(`begain init datas for token:${GAME_SYSTEM.getTokenBySocket(socket)}`);
   const defaultNumerCardsMap = numberCardsSystem.getEmptyCards();
   const defaultCharCardsMap = charCardsSystem.getEmptyCards();
   const defaultEmptyCardsMap = emptyCardsSystem.getEmptyCards();
@@ -79,7 +79,7 @@ function initDatas(socket) {
   const gameDatas = createGameDatas(defaultNumerCardsMap, defaultCharCardsMap, defaultEmptyCardsMap, defaultCandidateCards, socket);
   appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
   appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
-  recordInfor(`begain init datas for token:${socket.token}`);
+  recordInfor(`end init datas for token:${GAME_SYSTEM.getTokenBySocket(socket)}`);
   return gameDatas;
 }
 
@@ -88,6 +88,7 @@ function clearAllCards(gameDatas) {
   gameDatas.charCardsMap.clear();
   gameDatas.emptyCardsMap = emptyCardsSystem.getEmptyCards();
   gameDatas.candidateCards = candidateCardsSystem.getEmptyCards();
+  gameDatas.playgroundCards = playgroundCardsSystem.getPlaygroundCards(gameDatas.numberCardsMap, gameDatas.charCardsMap, gameDatas.emptyCardsMap);
   appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
   appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
 }
