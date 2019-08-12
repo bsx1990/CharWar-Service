@@ -1,5 +1,5 @@
 module.exports = {
-  canExecuteCombinedSkill: canExecuteCombinedSkill
+  canExecuteCombinedSkill
 };
 
 const GAME_SYSTEM = require('./game-system');

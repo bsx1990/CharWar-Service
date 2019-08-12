@@ -50,7 +50,12 @@ function startServer(port) {
   recordInfor(`app listen at:${port}`);
 }
 
+function stopServer() {
+  APP.close();
+}
+
 module.exports = {
   startServer,
+  stopServer,
   GAME_SYSTEM
 };
