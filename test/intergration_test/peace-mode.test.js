@@ -33,9 +33,43 @@ describe('Peace Mode', function() {
       clientSocket.emit(CLICK_CARD, 0, 0);
       setTimeout(() => {
         var expectedNumberMap = new Map([['0/0', { row: 0, column: 0, key: '0/0', value: 1 }]]);
+        var expectedCharMap = new Map();
+        var expectedEmptyMap = new Map([
+          ['0/1', { row: 0, column: 1, key: '0/1', value: null }],
+          ['0/2', { row: 0, column: 2, key: '0/2', value: null }],
+          ['0/3', { row: 0, column: 3, key: '0/3', value: null }],
+          ['1/0', { row: 1, column: 0, key: '1/0', value: null }],
+          ['1/1', { row: 1, column: 1, key: '1/1', value: null }],
+          ['1/2', { row: 1, column: 2, key: '1/2', value: null }],
+          ['1/3', { row: 1, column: 3, key: '1/3', value: null }],
+          ['2/0', { row: 2, column: 0, key: '2/0', value: null }],
+          ['2/1', { row: 2, column: 1, key: '2/1', value: null }],
+          ['2/2', { row: 2, column: 2, key: '2/2', value: null }],
+          ['2/3', { row: 2, column: 3, key: '2/3', value: null }],
+          ['3/0', { row: 3, column: 0, key: '3/0', value: null }],
+          ['3/1', { row: 3, column: 1, key: '3/1', value: null }],
+          ['3/2', { row: 3, column: 2, key: '3/2', value: null }],
+          ['3/3', { row: 3, column: 3, key: '3/3', value: null }]
+        ]);
+        var expectedPlaygroundCards = [[1, null, null, null], [null, null, null, null], [null, null, null, null], [null, null, null, null]];
+        var expectedScore = 0;
+        var expectedGameState = '';
+        var expectedCombinedSkills = [];
         var gameDatas = GAME_SYSTEM.getGameDatasByToken(TOKEN);
         var resultNumberMap = gameDatas.numberCardsMap;
+        var resultCharMap = gameDatas.charCardsMap;
+        var resultEmptyMap = gameDatas.emptyCardsMap;
+        var resultPlaygroundCards = gameDatas.playgroundCards;
+        var resultScore = gameDatas.score;
+        var resultGameState = gameDatas.gameState;
+        var resultCombinedSkills = gameDatas.combinedSkills;
         JSON.stringify(expectedNumberMap).should.be.equal(JSON.stringify(resultNumberMap));
+        JSON.stringify(expectedCharMap).should.be.equal(JSON.stringify(resultCharMap));
+        JSON.stringify(expectedEmptyMap).should.be.equal(JSON.stringify(resultEmptyMap));
+        JSON.stringify(expectedPlaygroundCards).should.be.equal(JSON.stringify(resultPlaygroundCards));
+        JSON.stringify(expectedScore).should.be.equal(JSON.stringify(resultScore));
+        JSON.stringify(expectedGameState).should.be.equal(JSON.stringify(resultGameState));
+        JSON.stringify(expectedCombinedSkills).should.be.equal(JSON.stringify(resultCombinedSkills));
         done();
       }, 1000);
     });
