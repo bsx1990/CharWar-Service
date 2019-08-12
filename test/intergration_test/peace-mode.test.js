@@ -55,6 +55,7 @@ describe('Peace Mode', function() {
         var expectedScore = 0;
         var expectedGameState = '';
         var expectedCombinedSkills = [];
+
         var gameDatas = GAME_SYSTEM.getGameDatasByToken(TOKEN);
         var resultNumberMap = gameDatas.numberCardsMap;
         var resultCharMap = gameDatas.charCardsMap;
@@ -63,13 +64,14 @@ describe('Peace Mode', function() {
         var resultScore = gameDatas.score;
         var resultGameState = gameDatas.gameState;
         var resultCombinedSkills = gameDatas.combinedSkills;
-        JSON.stringify(expectedNumberMap).should.be.equal(JSON.stringify(resultNumberMap));
-        JSON.stringify(expectedCharMap).should.be.equal(JSON.stringify(resultCharMap));
-        JSON.stringify(expectedEmptyMap).should.be.equal(JSON.stringify(resultEmptyMap));
-        JSON.stringify(expectedPlaygroundCards).should.be.equal(JSON.stringify(resultPlaygroundCards));
-        JSON.stringify(expectedScore).should.be.equal(JSON.stringify(resultScore));
-        JSON.stringify(expectedGameState).should.be.equal(JSON.stringify(resultGameState));
-        JSON.stringify(expectedCombinedSkills).should.be.equal(JSON.stringify(resultCombinedSkills));
+
+        expectedNumberMap.should.be.deepEqual(resultNumberMap);
+        expectedCharMap.should.be.deepEqual(resultCharMap);
+        expectedEmptyMap.should.be.deepEqual(resultEmptyMap);
+        expectedPlaygroundCards.should.be.deepEqual(resultPlaygroundCards);
+        expectedScore.should.be.deepEqual(resultScore);
+        expectedGameState.should.be.deepEqual(resultGameState);
+        expectedCombinedSkills.should.be.deepEqual(resultCombinedSkills);
         done();
       }, 1000);
     });
