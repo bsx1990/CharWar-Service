@@ -13,7 +13,7 @@ function clickCard(gameDatas, rowIndex, columnIndex) {
   if (needResponseSkill && hasCardAtClickedPosition) {
     executeNeedResponsedSkill(gameDatas, clickedCard);
     if (gameDatas.combinedSkills.legth == 0) {
-      gameDatas.gameState = null;
+      gameDatas.gameState = '';
     }
     return;
   }
@@ -31,6 +31,8 @@ function clickCard(gameDatas, rowIndex, columnIndex) {
   }
 
   const combinedInfor = LOGIC_SYSTEM.combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(gameDatas, clickedCard);
+  recordInfor('combinedInfor:');
+  recordObject(combinedInfor);
   if (GAME_SYSTEM.canExecuteCombinedSkill(combinedInfor, gameDatas)) {
     executeCombinedSkill(combinedInfor, gameDatas);
   } else {
@@ -80,6 +82,7 @@ function generateCharCard(emptyCardsMap, gameDatas) {
 }
 
 function executeCombinedSkill(combinedInfor, gameDatas) {
+  recordInfor('begin to execute combined skill');
   const socket = gameDatas.socket;
 
   combinedInfor.skills.forEach(skill => {
@@ -87,7 +90,6 @@ function executeCombinedSkill(combinedInfor, gameDatas) {
 
     if (skill.type == SKILL_TYPE.noResponse) {
       skill.execute(combinedInfor, gameDatas);
-      LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas);
       LOGIC_SYSTEM.checkGameStatusAfterCombined(gameDatas);
     } else {
       gameDatas.combinedSkills.push(skill);
@@ -96,7 +98,9 @@ function executeCombinedSkill(combinedInfor, gameDatas) {
     }
   });
 
+  LOGIC_SYSTEM.updateAndEmitScoreChanged(combinedInfor.score, gameDatas);
   combinedInfor.skills = [];
+  recordInfor('end execute combined skill');
 }
 
 const GAME_SYSTEM = require('../game-system');
