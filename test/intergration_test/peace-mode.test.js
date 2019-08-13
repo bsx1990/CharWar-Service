@@ -7,7 +7,7 @@ const GET_DATA = GAME_SYSTEM.GET_DATA;
 const CLICK_CARD = GAME_SYSTEM.CLICK_CARD;
 const REPLAY = GAME_SYSTEM.REPLAY;
 
-const PEACE_MODES = 'peace';
+const PEACE_MODE = 'peace';
 const TOKEN = 'UnitTest-Peace';
 const PORT = 2000;
 
@@ -16,19 +16,15 @@ describe('Peace Mode', function() {
 
   before(function(done) {
     SERVICE_STARTER.startServer(PORT);
-    done();
-  });
-
-  beforeEach(function(done) {
     clientSocket = CLIENT_IO(`ws://192.168.12.65:${PORT}?token=${TOKEN}`);
     clientSocket.on('connect', function() {
-      clientSocket.emit(GAME_MODE_CHANGED, PEACE_MODES);
+      clientSocket.emit(GAME_MODE_CHANGED, PEACE_MODE);
       clientSocket.emit(GET_DATA);
       done();
     });
   });
 
-  afterEach(function(done) {
+  beforeEach(function(done) {
     clientSocket.emit(REPLAY);
     done();
   });

@@ -7,13 +7,6 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run Test",
-      "program": "${workspaceRoot}/node_modules/mocha/bin/mocha",
-      "args": ["${workspaceFolder}/test/**/*.test.js"]
-    },
-    {
-      "type": "node",
-      "request": "launch",
       "name": "Launch Program",
       "program": "${workspaceFolder}\\app.js"
     }

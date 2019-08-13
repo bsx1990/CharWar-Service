@@ -16,10 +16,6 @@ describe('War Mode', function() {
 
   before(function(done) {
     SERVICE_STARTER.startServer(PORT);
-    done();
-  });
-
-  beforeEach(function(done) {
     clientSocket = CLIENT_IO(`ws://192.168.12.65:${PORT}?token=${TOKEN}`);
     clientSocket.on('connect', function() {
       clientSocket.emit(GAME_MODE_CHANGED, WAR_MODE);
@@ -28,7 +24,7 @@ describe('War Mode', function() {
     });
   });
 
-  afterEach(function(done) {
+  beforeEach(function(done) {
     clientSocket.emit(REPLAY);
     done();
   });
