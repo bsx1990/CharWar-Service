@@ -1,14 +1,9 @@
-function createExpectedGameDatas(numberCardsMap, charCardsMap, emptyCardsMap, playgroundCards, score, gameState, combinedSkills) {
-  return {
-    numberCardsMap: numberCardsMap,
-    charCardsMap: charCardsMap,
-    emptyCardsMap: emptyCardsMap,
-    playgroundCards: playgroundCards,
-    score: score,
-    gameState: gameState,
-    combinedSkills: combinedSkills
-  };
-}
+module.exports = {
+  emptyMockedGameDatas,
+  getResultGameDatas,
+  debugInfor,
+  debugObject
+};
 
 function emptyMockedGameDatas() {
   return {
@@ -75,8 +70,10 @@ function getResultGameDatas(gameDatas) {
   };
 }
 
-module.exports = {
-  createExpectedGameDatas,
-  emptyMockedGameDatas,
-  getResultGameDatas
-};
+function debugInfor(text) {
+  console.log(`DEBUG::: ${text}`);
+}
+
+function debugObject(object) {
+  console.log(object);
+}

@@ -25,16 +25,21 @@ function setSubscribeForSocketIO(io) {
       GAME_SYSTEM.emitGameDatas(gameDatas);
     });
 
-    socket.on(CLICK_CARD, (rowIndex, columnIndex) => {
+    socket.on(CLICK_CARD, (rowIndex, columnIndex, callback) => {
       recordInfor(
         `received clickCard request from token is:${GAME_SYSTEM.getTokenBySocket(socket)}, rowIndex:${rowIndex} columnIndex:${columnIndex}`
       );
       GAME_SYSTEM.clickCard(socket, rowIndex, columnIndex);
+
+      if (callback != null) {
+        callback();
+      }
     });
 
-    socket.on(REPLAY, () => {
+    socket.on(REPLAY, callback => {
       recordInfor(`received replay request from token is:${GAME_SYSTEM.getTokenBySocket(socket)}`);
       GAME_SYSTEM.replay(socket);
+      callback();
     });
 
     socket.on(GAME_MODE_CHANGED, mode => {
