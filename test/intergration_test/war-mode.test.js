@@ -465,41 +465,4 @@ describe('War Mode', function() {
       });
     });
   });
-
-  describe('Simple Pentacle Growing Skill', function() {
-    title = 'should run one more times combining, after executed Pentacle Growing Skill';
-    it(title, function(done) {
-      debugInfor(`BEGIN TEST: ${title}`);
-      var mockedGameDatas = TEST_UTIL.emptyMockedGameDatas();
-      mockedGameDatas
-        .addCard(0, 0, 1)
-        .addCard(0, 2, 1)
-        .addCard(2, 0, 1)
-        .addCard(2, 2, 1)
-        .addCard(0, 1, 3)
-        .addCard(2, 1, 3)
-        .addCard(1, 0, 4)
-        .addCard(1, 2, 4);
-      var mockedResult = mockedGameDatas.getResult();
-      var mockedCandidateCards = [1, 1];
-      var gameDatas = GAME_SYSTEM.getGameDatasByToken(TOKEN);
-      gameDatas.numberCardsMap = mockedResult.numberCardsMap;
-      gameDatas.charCardsMap = mockedResult.charCardsMap;
-      gameDatas.emptyCardsMap = mockedResult.emptyCardsMap;
-      gameDatas.playgroundCards = mockedResult.playgroundCards;
-      gameDatas.candidateCards = mockedCandidateCards;
-
-      clientSocket.emit(CLICK_CARD, 1, 1, () => {
-        var expectedGameDatas = TEST_UTIL.emptyMockedGameDatas();
-        expectedGameDatas.addCard(1, 1, 5);
-        expectedGameDatas.score = 18;
-
-        var resultGameDatas = TEST_UTIL.getResultGameDatas(gameDatas);
-
-        expectedGameDatas.getResult().should.be.deepEqual(resultGameDatas);
-        done();
-        debugInfor(`END TEST: ${title}`);
-      });
-    });
-  });
 });
