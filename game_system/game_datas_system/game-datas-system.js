@@ -249,7 +249,7 @@ function getCardFromGameDatas(gameDatas, rowIndex, columnIndex) {
     return emptyCardsMap.get(cardKey);
   }
 
-  return null;
+  throw `card not exist in gameDatas, rowIndex:${rowIndex}, columnIndex:${columnIndex}, gameDatas:${gameDatas}`;
 }
 
 function decreaseCard(card) {

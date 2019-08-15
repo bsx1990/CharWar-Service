@@ -9,8 +9,22 @@ const SKILL_TYPE = GAME_SYSTEM.SKILL_TYPE;
 const recordInfor = GAME_SYSTEM.recordInfor;
 const recordObject = GAME_SYSTEM.recordObject;
 
+const killAllSkill = {
+  name: SKILL_NAMES.killAllSkill,
+  type: SKILL_TYPE.noResponse,
+  priority: SKILL_PRIORITY.high,
+  canExecute: combinedInfor => {
+    return combinedInfor.totalCountOfCards == 8;
+  },
+  execute: (combinedInfor, gameDatas) => {
+    GAME_SYSTEM.clearAllCards(gameDatas);
+    GAME_SYSTEM.emitGameDatas(gameDatas);
+  },
+  blockList: []
+};
+
 const kingOfTheWorldSkill = {
-  name: SKILL_NAMES.kingOfTheWorld,
+  name: SKILL_NAMES.kingOfTheWorldSkill,
   type: SKILL_TYPE.noResponse,
   priority: SKILL_PRIORITY.high,
   canExecute: combinedInfor => {
@@ -26,7 +40,7 @@ const kingOfTheWorldSkill = {
     GAME_SYSTEM.clearAllCards(gameDatas);
     GAME_SYSTEM.emitGameDatas(gameDatas);
   },
-  blockList: []
+  blockList: [killAllSkill]
 };
 
 const critsScoreSkill = {
@@ -99,7 +113,15 @@ const numberAttackSkill = {
   }
 };
 
-const ALL_SKILLS = [critsScoreSkill, critsScore3TimesSkill, critsScore5TimesSkill, critsScore10TimesSkill, numberAttackSkill, kingOfTheWorldSkill];
+const ALL_SKILLS = [
+  critsScoreSkill,
+  critsScore3TimesSkill,
+  critsScore5TimesSkill,
+  critsScore10TimesSkill,
+  numberAttackSkill,
+  kingOfTheWorldSkill,
+  killAllSkill
+];
 const PRIORITY_SKILLS = splitAllSkillsIntoDifferentPriority(ALL_SKILLS);
 
 function getCanExecutedCombinedSkills(combinedInfor, gameDatas) {
@@ -149,5 +171,7 @@ function splitAllSkillsIntoDifferentPriority(allSkills) {
 
 function canExecuteCombinedSkill(combinedInfor, gameDatas) {
   combinedInfor.skills = getCanExecutedCombinedSkills(combinedInfor, gameDatas);
+  recordInfor('combinedInfor:');
+  recordObject(combinedInfor);
   return combinedInfor.skills.length > 0;
 }
