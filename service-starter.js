@@ -39,7 +39,9 @@ function subscribeReplay(socket) {
   socket.on(REPLAY, callback => {
     recordInfor(`received replay request from token is:${GAME_SYSTEM.getTokenBySocket(socket)}`);
     GAME_SYSTEM.replay(socket);
-    callback();
+    if (callback != null) {
+      callback();
+    }
   });
 }
 

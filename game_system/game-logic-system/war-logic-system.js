@@ -1,38 +1,20 @@
 module.exports = {
-  clickCard
+  combineCardsWithReceivedCard,
+  preHandleClickRequest
 };
 
-function clickCard(gameDatas, rowIndex, columnIndex) {
-  let playgroundCards = gameDatas.playgroundCards;
+function combineCardsWithReceivedCard(gameDatas, clickedCard) {
   let emptyCardsMap = gameDatas.emptyCardsMap;
   let numberCardsMap = gameDatas.numberCardsMap;
-  const hasCardAtClickedPosition = playgroundCards[rowIndex][columnIndex] != null;
-  const needResponseSkill = gameDatas.gameState == 'SelectTarget';
-  const clickedCard = GAME_SYSTEM.getCardFromGameDatas(gameDatas, rowIndex, columnIndex);
 
-  if (needResponseSkill && hasCardAtClickedPosition) {
-    executeNeedResponsedSkill(gameDatas, clickedCard);
-    if (gameDatas.combinedSkills.legth == 0) {
-      gameDatas.gameState = '';
-    }
-    return;
-  }
-
-  if ((needResponseSkill && !hasCardAtClickedPosition) || (!needResponseSkill && hasCardAtClickedPosition)) {
-    recordInfor(`need response skill:${needResponseSkill}, has card at clicked position:${hasCardAtClickedPosition}`);
-    return;
-  }
-
-  LOGIC_SYSTEM.placeCardsBeforeCombinCards(gameDatas, clickedCard);
+  LOGIC_SYSTEM.placeCardAtClickedPositionAndEmitChange(gameDatas, clickedCard);
 
   let canGenerateCharCard = canGenerateRandomCharCard(emptyCardsMap, numberCardsMap);
   if (canGenerateCharCard) {
-    generateCharCard(emptyCardsMap, gameDatas);
+    generateCharCard(gameDatas);
   }
 
   const combinedInfor = LOGIC_SYSTEM.combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(gameDatas, clickedCard);
-  recordInfor('combinedInfor:');
-  recordObject(combinedInfor);
   if (GAME_SYSTEM.canExecuteCombinedSkill(combinedInfor, gameDatas)) {
     executeCombinedSkill(combinedInfor, gameDatas);
   } else {
@@ -41,6 +23,28 @@ function clickCard(gameDatas, rowIndex, columnIndex) {
   }
 
   LOGIC_SYSTEM.recordGameDatasToLog(gameDatas);
+}
+
+function preHandleClickRequest(gameDatas, clickedCard) {
+  const HANDLED = true;
+  const UNHANDLED = false;
+  const playgroundCards = gameDatas.playgroundCards;
+  const hasCardAtClickedPosition = playgroundCards[clickedCard.row][clickedCard.column] != null;
+  const needResponseSkill = gameDatas.gameState == 'SelectTarget';
+
+  if (needResponseSkill && hasCardAtClickedPosition) {
+    executeNeedResponsedSkill(gameDatas, clickedCard);
+    if (gameDatas.combinedSkills.legth == 0) {
+      gameDatas.gameState = '';
+    }
+    return HANDLED;
+  }
+
+  if ((needResponseSkill && !hasCardAtClickedPosition) || (!needResponseSkill && hasCardAtClickedPosition)) {
+    recordInfor(`need response skill:${needResponseSkill}, has card at clicked position:${hasCardAtClickedPosition}`);
+    return HANDLED;
+  }
+  return UNHANDLED;
 }
 
 function executeNeedResponsedSkill(gameDatas, clickedCard) {
@@ -72,7 +76,8 @@ function canGenerateRandomCharCard(emptyCardsMap, numberCardsMap) {
   return hasEmpthCards && maxCardLargeThanGenerateLimit && isRandomMatchedGenerateRate;
 }
 
-function generateCharCard(emptyCardsMap, gameDatas) {
+function generateCharCard(gameDatas) {
+  const emptyCardsMap = gameDatas.emptyCardsMap;
   const socket = gameDatas.socket;
   let card = GAME_SYSTEM.getRandomEmptyCard(emptyCardsMap);
   card.value = GAME_SYSTEM.getRandomCharValue();

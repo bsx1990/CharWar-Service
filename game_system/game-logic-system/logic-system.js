@@ -17,7 +17,6 @@ const recordNoPrefixLog = GAME_SYSTEM.recordNoPrefixLog;
 module.exports = {
   clickCard,
   replay,
-  placeCardsBeforeCombinCards,
   combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor,
   updateAndEmitScoreChanged,
   checkGameStatusAfterCombined,
@@ -29,7 +28,8 @@ module.exports = {
   PLAY_SKILL,
   PLAYGROUND_CARDS_CHANGED,
   GAME_STATE_CHANGED,
-  SKILL_TYPE
+  SKILL_TYPE,
+  placeCardAtClickedPositionAndEmitChange
 };
 
 function clickCard(socket, rowIndex, columnIndex) {
@@ -42,7 +42,16 @@ function clickCard(socket, rowIndex, columnIndex) {
     return;
   }
 
-  logicHandler.clickCard(gameDatas, rowIndex, columnIndex);
+  const clickedCard = GAME_SYSTEM.getCardFromGameDatas(gameDatas, rowIndex, columnIndex);
+  var handled = logicHandler.preHandleClickRequest(gameDatas, clickedCard);
+  if (handled) {
+    return;
+  }
+
+  clickedCard.value = gameDatas.candidateCards.shift();
+  generateAndEmitNewCandidateCards(gameDatas);
+
+  logicHandler.combineCardsWithReceivedCard(gameDatas, clickedCard);
 }
 
 function getLogicHandler(gameMode) {
@@ -59,13 +68,7 @@ function getLogicHandler(gameMode) {
   }
 }
 
-function placeCardsBeforeCombinCards(gameDatas, currentCard) {
-  currentCard.value = gameDatas.candidateCards.shift();
-  generateNewCandidateCardsAndEmitChange(gameDatas);
-  placeCardAtClickedPositionAndEmitChange(gameDatas, currentCard);
-}
-
-function generateNewCandidateCardsAndEmitChange(gameDatas) {
+function generateAndEmitNewCandidateCards(gameDatas) {
   GAME_SYSTEM.appendRandomCandidateCard(gameDatas.numberCardsMap, gameDatas.candidateCards);
   gameDatas.socket.emit(CANDIDATE_CARDS_CHANGED, gameDatas.candidateCards);
 }
