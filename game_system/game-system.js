@@ -129,6 +129,9 @@ module.exports = {
   },
   clearAllCards: gameDatas => {
     DATAS_SYSTEM.clearAllCards(gameDatas);
+  },
+  combineCardsWithReceivedCard: (gameDatas, receivedCard) => {
+    LOGIC_SYSTEM.combineCardsWithReceivedCard(gameDatas, receivedCard);
   }
 };
 

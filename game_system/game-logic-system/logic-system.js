@@ -29,7 +29,8 @@ module.exports = {
   PLAYGROUND_CARDS_CHANGED,
   GAME_STATE_CHANGED,
   SKILL_TYPE,
-  placeCardAtClickedPositionAndEmitChange
+  placeCardAtClickedPositionAndEmitChange,
+  combineCardsWithReceivedCard
 };
 
 function clickCard(socket, rowIndex, columnIndex) {
@@ -37,7 +38,7 @@ function clickCard(socket, rowIndex, columnIndex) {
   const gameMode = GAME_SYSTEM.getGameModeByToken(token);
   const gameDatas = GAME_SYSTEM.getGameDatasByToken(token);
 
-  let logicHandler = getLogicHandler(gameMode);
+  const logicHandler = getLogicHandler(gameMode);
   if (logicHandler == null) {
     return;
   }
@@ -52,6 +53,16 @@ function clickCard(socket, rowIndex, columnIndex) {
   generateAndEmitNewCandidateCards(gameDatas);
 
   logicHandler.combineCardsWithReceivedCard(gameDatas, clickedCard);
+}
+
+function combineCardsWithReceivedCard(gameDatas, receivedCard) {
+  const gameMode = GAME_SYSTEM.getGameModeByToken(gameDatas.token);
+  const logicHandler = getLogicHandler(gameMode);
+  if (logicHandler == null) {
+    return;
+  }
+
+  logicHandler.combineCardsWithReceivedCard(gameDatas, receivedCard);
 }
 
 function getLogicHandler(gameMode) {
@@ -82,7 +93,7 @@ function combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(gameDatas, cent
   const socket = gameDatas.socket;
   let playgroundCards = gameDatas.playgroundCards;
   const numberCardsMap = gameDatas.numberCardsMap;
-  let combinedInformation = { round: 0, totalCountOfCards: 0, maxCountOfSingleCombined: 0, combinedCardValue: 0, skills: [], score: 0 };
+  let combinedInformation = { round: 0, totalCountOfCards: 0, maxCountOfSingleCombined: 0, clickedCard: centerCard, skills: [], score: 0 };
 
   let combinedCards = getSameCardsFromAround(numberCardsMap, centerCard);
   let foundSameCardsFromAround = combinedCards.length > 0;
@@ -90,7 +101,7 @@ function combinCardsUntilNoSameCardsAroundAndReturnCombinedInfor(gameDatas, cent
   while (foundSameCardsFromAround) {
     recordScoreToCombinedInfor(combinedCards, combinedInformation);
 
-    combineCards(gameDatas, combinedCards, centerCard, combinedInformation);
+    combineCards(gameDatas, combinedCards, combinedInformation);
     socket.emit(PLAYGROUND_CARDS_CHANGED, playgroundCards);
 
     combinedCards = getSameCardsFromAround(numberCardsMap, centerCard);
@@ -127,9 +138,10 @@ function recordScoreToCombinedInfor(combinedCards, combinedInformation) {
   combinedInformation.score += GAME_SYSTEM.getSumOfCardValues(combinedCards);
 }
 
-function combineCards(gameDatas, cards, centerCard, combinedInformation) {
+function combineCards(gameDatas, cards, combinedInformation) {
+  let centerCard = combinedInformation.clickedCard;
   centerCard.value += 1;
-  updateCombinedInforForSingleRound(combinedInformation, cards, centerCard);
+  updateCombinedInforForSingleRound(combinedInformation, cards);
 
   cards.forEach(card => {
     card.value = null;
@@ -139,13 +151,12 @@ function combineCards(gameDatas, cards, centerCard, combinedInformation) {
   GAME_SYSTEM.setCard(gameDatas, centerCard);
 }
 
-function updateCombinedInforForSingleRound(combinedInformation, cardsOfThisRound, centerCard) {
+function updateCombinedInforForSingleRound(combinedInformation, cardsOfThisRound) {
   combinedInformation.round += 1;
   if (cardsOfThisRound.length > combinedInformation.maxCountOfSingleCombined) {
     combinedInformation.maxCountOfSingleCombined = cardsOfThisRound.length;
   }
   combinedInformation.totalCountOfCards += cardsOfThisRound.length;
-  combinedInformation.combinedCardValue = centerCard.value;
 }
 
 function updateAndEmitScoreChanged(score, gameDatas) {

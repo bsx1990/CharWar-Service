@@ -68,6 +68,7 @@ exports.skillNames = {
   numberAttackSkill: 'Number Attack',
   kingOfTheWorldSkill: 'King Of The World',
   killAllSkill: 'Kill All',
+  pentacleGrowingSkill: 'Pentacle Growing'
 };
 
 exports.skillPriority = {

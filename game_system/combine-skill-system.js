@@ -9,6 +9,21 @@ const SKILL_TYPE = GAME_SYSTEM.SKILL_TYPE;
 const recordInfor = GAME_SYSTEM.recordInfor;
 const recordObject = GAME_SYSTEM.recordObject;
 
+const pentacleGrowingSkill = {
+  name: SKILL_NAMES.pentacleGrowingSkill,
+  type: SKILL_TYPE.noResponse,
+  priority: SKILL_PRIORITY.high,
+  canExecute: combinedInfor => {
+    return combinedInfor.maxCountOfSingleCombined == 4;
+  },
+  execute: (combinedInfor, gameDatas) => {
+    let clickedCard = combinedInfor.clickedCard;
+    clickedCard.value += 1;
+
+    GAME_SYSTEM.combineCardsWithReceivedCard(gameDatas, clickedCard);
+  }
+};
+
 const killAllSkill = {
   name: SKILL_NAMES.killAllSkill,
   type: SKILL_TYPE.noResponse,
@@ -20,7 +35,7 @@ const killAllSkill = {
     GAME_SYSTEM.clearAllCards(gameDatas);
     GAME_SYSTEM.emitGameDatas(gameDatas);
   },
-  blockList: []
+  blockList: [pentacleGrowingSkill]
 };
 
 const kingOfTheWorldSkill = {
@@ -40,7 +55,7 @@ const kingOfTheWorldSkill = {
     GAME_SYSTEM.clearAllCards(gameDatas);
     GAME_SYSTEM.emitGameDatas(gameDatas);
   },
-  blockList: [killAllSkill]
+  blockList: [killAllSkill, pentacleGrowingSkill]
 };
 
 const critsScoreSkill = {
@@ -120,7 +135,8 @@ const ALL_SKILLS = [
   critsScore10TimesSkill,
   numberAttackSkill,
   kingOfTheWorldSkill,
-  killAllSkill
+  killAllSkill,
+  pentacleGrowingSkill
 ];
 const PRIORITY_SKILLS = splitAllSkillsIntoDifferentPriority(ALL_SKILLS);
 
