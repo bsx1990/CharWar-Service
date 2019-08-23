@@ -429,7 +429,7 @@ describe('War Mode', function() {
   });
 
   describe('Simple Kill All Skill', function() {
-    title = 'should kill all cards, after combining 8 cards';
+    title = 'should not kill all cards, after combining 8 cards, but the combined card value is less than 6';
     it(title, function(done) {
       debugInfor(`BEGIN TEST: ${title}`);
       var mockedGameDatas = TEST_UTIL.emptyMockedGameDatas();
@@ -455,7 +455,48 @@ describe('War Mode', function() {
 
       clientSocket.emit(CLICK_CARD, 1, 1, () => {
         var expectedGameDatas = TEST_UTIL.emptyMockedGameDatas();
+        expectedGameDatas
+          .addCard(1, 1, 5)
+          .addCard(0, 3, 'C')
+          .addCard(1, 3, 4);
         expectedGameDatas.score = 14;
+
+        var resultGameDatas = TEST_UTIL.getResultGameDatas(gameDatas);
+
+        expectedGameDatas.getResult().should.be.deepEqual(resultGameDatas);
+        done();
+        debugInfor(`END TEST: ${title}`);
+      });
+    });
+
+    title = 'should kill all cards, after combining 8 cards, and the combined card value is not less than 6';
+    it(title, function(done) {
+      debugInfor(`BEGIN TEST: ${title}`);
+      var mockedGameDatas = TEST_UTIL.emptyMockedGameDatas();
+      mockedGameDatas
+        .addCard(0, 0, 2)
+        .addCard(0, 2, 3)
+        .addCard(2, 0, 3)
+        .addCard(2, 2, 3)
+        .addCard(0, 1, 4)
+        .addCard(2, 1, 4)
+        .addCard(1, 0, 6)
+        .addCard(1, 2, 5)
+        .addCard(0, 3, 'C')
+        .addCard(1, 3, 1);
+      var mockedResult = mockedGameDatas.getResult();
+      var mockedCandidateCards = [2, 1];
+      var gameDatas = GAME_SYSTEM.getGameDatasByToken(TOKEN);
+      gameDatas.numberCardsMap = mockedResult.numberCardsMap;
+      gameDatas.charCardsMap = mockedResult.charCardsMap;
+      gameDatas.emptyCardsMap = mockedResult.emptyCardsMap;
+      gameDatas.playgroundCards = mockedResult.playgroundCards;
+      gameDatas.candidateCards = mockedCandidateCards;
+
+      clientSocket.emit(CLICK_CARD, 1, 1, () => {
+        var expectedGameDatas = TEST_UTIL.emptyMockedGameDatas();
+        expectedGameDatas;
+        expectedGameDatas.score = 30;
 
         var resultGameDatas = TEST_UTIL.getResultGameDatas(gameDatas);
 

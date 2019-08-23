@@ -29,7 +29,7 @@ const killAllSkill = {
   type: SKILL_TYPE.noResponse,
   priority: SKILL_PRIORITY.high,
   canExecute: combinedInfor => {
-    return combinedInfor.totalCountOfCards == 8;
+    return combinedInfor.totalCountOfCards == 8 && combinedInfor.clickedCard.value > 6;
   },
   execute: (combinedInfor, gameDatas) => {
     GAME_SYSTEM.clearAllCards(gameDatas);
