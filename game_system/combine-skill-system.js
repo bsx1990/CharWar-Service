@@ -21,6 +21,7 @@ const pentacleGrowingSkill = {
     clickedCard.value += 1;
 
     GAME_SYSTEM.combineCardsWithReceivedCard(gameDatas, clickedCard);
+    return true;
   }
 };
 
@@ -34,6 +35,7 @@ const killAllSkill = {
   execute: (combinedInfor, gameDatas) => {
     GAME_SYSTEM.clearAllCards(gameDatas);
     GAME_SYSTEM.emitGameDatas(gameDatas);
+    return true;
   },
   blockList: [pentacleGrowingSkill]
 };
@@ -54,6 +56,7 @@ const kingOfTheWorldSkill = {
 
     GAME_SYSTEM.clearAllCards(gameDatas);
     GAME_SYSTEM.emitGameDatas(gameDatas);
+    return true;
   },
   blockList: [killAllSkill, pentacleGrowingSkill]
 };
@@ -67,6 +70,7 @@ const critsScoreSkill = {
   },
   execute: combinedInfor => {
     combinedInfor.score = combinedInfor.score * 2;
+    return true;
   },
   blockList: []
 };
@@ -80,6 +84,7 @@ const critsScore3TimesSkill = {
   },
   execute: combinedInfor => {
     combinedInfor.score = combinedInfor.score * 3;
+    return true;
   },
   blockList: [critsScoreSkill]
 };
@@ -93,6 +98,7 @@ const critsScore5TimesSkill = {
   },
   execute: combinedInfor => {
     combinedInfor.score = combinedInfor.score * 5;
+    return true;
   },
   blockList: [critsScoreSkill, critsScore3TimesSkill]
 };
@@ -106,6 +112,7 @@ const critsScore10TimesSkill = {
   },
   execute: combinedInfor => {
     combinedInfor.score = combinedInfor.score * 10;
+    return true;
   },
   blockList: [critsScoreSkill, critsScore3TimesSkill, critsScore5TimesSkill]
 };
@@ -119,12 +126,19 @@ const numberAttackSkill = {
   },
   execute: (clickedCard, gameDatas) => {
     recordInfor('begin number attack skill execute');
+
+    if (GAME_SYSTEM.isNumberCard(clickedCard)) {
+      recordInfor('number attack skill execute exit, current clicked card is number card');
+      return false;
+    }
+
     clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
     GAME_SYSTEM.setCard(gameDatas, clickedCard);
     gameDatas.gameState = '';
     GAME_SYSTEM.emitGameDatas(gameDatas);
     GAME_SYSTEM.checkGameStatusAfterCombined(gameDatas);
     recordInfor('end number attack skill execute');
+    return true;
   }
 };
 

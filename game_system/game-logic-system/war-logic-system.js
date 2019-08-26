@@ -33,7 +33,7 @@ function preHandleClickRequest(gameDatas, clickedCard) {
   const needResponseSkill = gameDatas.gameState == 'SelectTarget';
 
   if (needResponseSkill && hasCardAtClickedPosition) {
-    executeNeedResponsedSkill(gameDatas, clickedCard);
+    executeNeedResponsedSkills(gameDatas, clickedCard);
     if (gameDatas.combinedSkills.legth == 0) {
       gameDatas.gameState = '';
     }
@@ -47,7 +47,7 @@ function preHandleClickRequest(gameDatas, clickedCard) {
   return UNHANDLED;
 }
 
-function executeNeedResponsedSkill(gameDatas, clickedCard) {
+function executeNeedResponsedSkills(gameDatas, clickedCard) {
   recordInfor('begin response skill');
   if (clickedCard == null) {
     recordError('end response skill. clicked card is null');
@@ -62,7 +62,12 @@ function executeNeedResponsedSkill(gameDatas, clickedCard) {
     const skill = gameDatas.combinedSkills.shift();
     recordInfor('current skill is:');
     recordObject(skill);
-    skill.execute(clickedCard, gameDatas);
+    var isSkillExecuted = skill.execute(clickedCard, gameDatas);
+    if (!isSkillExecuted) {
+      recordInfor('skill has not been executed, put it back.');
+      gameDatas.combinedSkills.unshift(skill);
+      break;
+    }
   }
   recordInfor('end response skill');
 }

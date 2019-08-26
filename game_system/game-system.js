@@ -132,6 +132,9 @@ module.exports = {
   },
   combineCardsWithReceivedCard: (gameDatas, receivedCard) => {
     LOGIC_SYSTEM.combineCardsWithReceivedCard(gameDatas, receivedCard);
+  },
+  isNumberCard: card => {
+    return DATAS_SYSTEM.isNumberCard(card);
   }
 };
 

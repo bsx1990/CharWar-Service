@@ -45,7 +45,8 @@ module.exports = {
   getCardFromGameDatas,
   decreaseCard,
   getPrintedGameDatas,
-  clearAllCards
+  clearAllCards,
+  isNumberCard
 };
 
 let candidateCardsSystem = require('./candidate-cards-system');
@@ -285,6 +286,11 @@ function decreaseCard(card) {
 function getCardType(card) {
   let cardValue = card.value;
   return cardValue == null ? cardType.empty : isNaN(cardValue) ? cardType.char : cardType.number;
+}
+
+function isNumberCard(card) {
+  let cardValue = card.value;
+  return cardValue == null ? false : !isNaN(cardValue);
 }
 
 function getPrintedGameDatas(gameDatas) {
