@@ -139,7 +139,34 @@ const numberAttackSkill = {
     GAME_SYSTEM.checkGameStatusAfterCombined(gameDatas);
     recordInfor('end number attack skill execute');
     return true;
-  }
+  },
+  blockList: []
+};
+
+const absolutelyAttackSkill = {
+  name: SKILL_NAMES.absolutelyAttackSkill,
+  type: SKILL_TYPE.needResponse,
+  priority: SKILL_PRIORITY.normal,
+  canExecute: (combinedInfor, gameDatas) => {
+    return combinedInfor.totalCountOfCards > 1 && gameDatas.charCardsMap.size > 0;
+  },
+  execute: (clickedCard, gameDatas) => {
+    recordInfor('begin absolutely attack skill execute');
+    clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+    gameDatas.gameState = '';
+
+    if (GAME_SYSTEM.isNumberCard(clickedCard)) {
+      GAME_SYSTEM.combineCardsWithReceivedCard(gameDatas, clickedCard);
+    } else {
+      GAME_SYSTEM.setCard(gameDatas, clickedCard);
+      GAME_SYSTEM.emitGameDatas(gameDatas);
+      GAME_SYSTEM.checkGameStatusAfterCombined(gameDatas);
+    }
+
+    recordInfor('end absolutely attack skill execute');
+    return true;
+  },
+  blockList: [numberAttackSkill]
 };
 
 const ALL_SKILLS = [
@@ -150,7 +177,8 @@ const ALL_SKILLS = [
   numberAttackSkill,
   kingOfTheWorldSkill,
   killAllSkill,
-  pentacleGrowingSkill
+  pentacleGrowingSkill,
+  absolutelyAttackSkill
 ];
 const PRIORITY_SKILLS = splitAllSkillsIntoDifferentPriority(ALL_SKILLS);
 

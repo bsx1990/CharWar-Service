@@ -66,6 +66,7 @@ exports.skillNames = {
   critsScore5TimesSkill: 'Crits Score: 5 Times',
   critsScore10TimesSkill: 'Crits Score: 10 Times',
   numberAttackSkill: 'Number Attack',
+  absolutelyAttackSkill: 'Absolutely Attack',
   kingOfTheWorldSkill: 'King Of The World',
   killAllSkill: 'Kill All',
   pentacleGrowingSkill: 'Pentacle Growing'

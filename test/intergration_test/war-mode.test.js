@@ -244,15 +244,10 @@ describe('War Mode', function() {
           var expectedGameDatas = TEST_UTIL.emptyMockedGameDatas();
           expectedGameDatas.addCard(0, 1, 2);
           expectedGameDatas.score = 1;
-          var expectedResult = expectedGameDatas.getResult();
 
-          var resultGameDatas = TEST_UTIL.getResultGameDatas(gameDatas);
-
-          expectedResult.numberCardsMap.should.be.deepEqual(resultGameDatas.numberCardsMap);
-          resultGameDatas.charCardsMap.has('0/2').should.be.false();
-          expectedResult.score.should.be.deepEqual(resultGameDatas.score);
-          done();
+          expectedGameDatas.getResult().should.be.deepEqual(TEST_UTIL.getResultGameDatas(gameDatas));
           debugInfor(`END TEST: ${title}`);
+          done();
         });
       });
     });
@@ -274,17 +269,12 @@ describe('War Mode', function() {
       clientSocket.emit(CLICK_CARD, 0, 1, () => {
         clientSocket.emit(CLICK_CARD, 0, 2, () => {
           var expectedGameDatas = TEST_UTIL.emptyMockedGameDatas();
-          expectedGameDatas.addCard(0, 1, 2);
+          expectedGameDatas.addCard(0, 1, 2).addCard(0, 2, 'A');
           expectedGameDatas.score = 1;
-          var expectedResult = expectedGameDatas.getResult();
 
-          var resultGameDatas = TEST_UTIL.getResultGameDatas(gameDatas);
-
-          expectedResult.numberCardsMap.should.be.deepEqual(resultGameDatas.numberCardsMap);
-          resultGameDatas.charCardsMap.get('0/2').value.should.be.equal('A');
-          expectedResult.score.should.be.deepEqual(resultGameDatas.score);
-          done();
+          expectedGameDatas.getResult().should.be.deepEqual(TEST_UTIL.getResultGameDatas(gameDatas));
           debugInfor(`END TEST: ${title}`);
+          done();
         });
       });
     });
@@ -306,17 +296,12 @@ describe('War Mode', function() {
       clientSocket.emit(CLICK_CARD, 0, 1, () => {
         clientSocket.emit(CLICK_CARD, 0, 2, () => {
           var expectedGameDatas = TEST_UTIL.emptyMockedGameDatas();
-          expectedGameDatas.addCard(0, 1, 2);
+          expectedGameDatas.addCard(0, 1, 2).addCard(0, 2, 'B');
           expectedGameDatas.score = 1;
-          var expectedResult = expectedGameDatas.getResult();
 
-          var resultGameDatas = TEST_UTIL.getResultGameDatas(gameDatas);
-
-          expectedResult.numberCardsMap.should.be.deepEqual(resultGameDatas.numberCardsMap);
-          resultGameDatas.charCardsMap.get('0/2').value.should.be.equal('B');
-          expectedResult.score.should.be.deepEqual(resultGameDatas.score);
-          done();
+          expectedGameDatas.getResult().should.be.deepEqual(TEST_UTIL.getResultGameDatas(gameDatas));
           debugInfor(`END TEST: ${title}`);
+          done();
         });
       });
     });
@@ -344,19 +329,119 @@ describe('War Mode', function() {
             var expectedGameDatas = TEST_UTIL.emptyMockedGameDatas();
             expectedGameDatas.addCard(0, 1, 2).addCard(0, 3, 1);
             expectedGameDatas.score = 1;
-            var expectedResult = expectedGameDatas.getResult();
 
-            var resultGameDatas = TEST_UTIL.getResultGameDatas(gameDatas);
-
-            expectedResult.numberCardsMap.should.be.deepEqual(resultGameDatas.numberCardsMap);
-            resultGameDatas.charCardsMap.has('0/2').should.be.false();
-            expectedResult.score.should.be.deepEqual(resultGameDatas.score);
-            done();
+            expectedGameDatas.getResult().should.be.deepEqual(TEST_UTIL.getResultGameDatas(gameDatas));
             debugInfor(`END TEST: ${title}`);
+            done();
           });
         });
       });
     });
+  });
+
+  describe('Simple Absolutely Attack Skill', function() {
+    title = 'should kill the char card(value: A) after combined total cards larger than 1';
+    it(title, function(done) {
+      debugInfor(`BEGIN TEST: ${title}`);
+      var mockedGameDatas = TEST_UTIL.emptyMockedGameDatas();
+      mockedGameDatas
+        .addCard(0, 0, 1)
+        .addCard(0, 2, 1)
+        .addCard(0, 3, 'A')
+        .addCard(1, 3, 1);
+      var mockedResult = mockedGameDatas.getResult();
+      var mockedCandidateCards = [1, 1];
+      var gameDatas = GAME_SYSTEM.getGameDatasByToken(TOKEN);
+      gameDatas.numberCardsMap = mockedResult.numberCardsMap;
+      gameDatas.charCardsMap = mockedResult.charCardsMap;
+      gameDatas.emptyCardsMap = mockedResult.emptyCardsMap;
+      gameDatas.playgroundCards = mockedResult.playgroundCards;
+      gameDatas.candidateCards = mockedCandidateCards;
+
+      clientSocket.emit(CLICK_CARD, 0, 1, () => {
+        clientSocket.emit(CLICK_CARD, 0, 3, () => {
+          var expectedGameDatas = TEST_UTIL.emptyMockedGameDatas();
+          expectedGameDatas.addCard(0, 1, 2).addCard(1, 3, 1);
+          expectedGameDatas.score = 2;
+          var expectedResult = expectedGameDatas.getResult();
+
+          var resultGameDatas = TEST_UTIL.getResultGameDatas(gameDatas);
+
+          expectedResult.should.be.deepEqual(resultGameDatas);
+          debugInfor(`END TEST: ${title}`);
+          done();
+        });
+      });
+    });
+
+    title = 'should kill the number card(value: 1) after combined total cards larger than 1';
+    it(title, function(done) {
+      debugInfor(`BEGIN TEST: ${title}`);
+      var mockedGameDatas = TEST_UTIL.emptyMockedGameDatas();
+      mockedGameDatas
+        .addCard(0, 0, 1)
+        .addCard(0, 2, 1)
+        .addCard(0, 3, 'A')
+        .addCard(1, 3, 1);
+      var mockedResult = mockedGameDatas.getResult();
+      var mockedCandidateCards = [1, 1];
+      var gameDatas = GAME_SYSTEM.getGameDatasByToken(TOKEN);
+      gameDatas.numberCardsMap = mockedResult.numberCardsMap;
+      gameDatas.charCardsMap = mockedResult.charCardsMap;
+      gameDatas.emptyCardsMap = mockedResult.emptyCardsMap;
+      gameDatas.playgroundCards = mockedResult.playgroundCards;
+      gameDatas.candidateCards = mockedCandidateCards;
+
+      clientSocket.emit(CLICK_CARD, 0, 1, () => {
+        clientSocket.emit(CLICK_CARD, 1, 3, () => {
+          var expectedGameDatas = TEST_UTIL.emptyMockedGameDatas();
+          expectedGameDatas.addCard(0, 1, 2).addCard(0, 3, 'A');
+          expectedGameDatas.score = 2;
+          var expectedResult = expectedGameDatas.getResult();
+          var resultGameDatas = TEST_UTIL.getResultGameDatas(gameDatas);
+          expectedResult.should.be.deepEqual(resultGameDatas);
+          debugInfor(`END TEST: ${title}`);
+          done();
+        });
+      });
+    });
+
+    // title = 'should kill the char card(value: A) instead of kill a number card, after combined one card and a wrong click at number card';
+    // it(title, function (done) {
+    //   debugInfor(`BEGIN TEST: ${title}`);
+    //   var mockedGameDatas = TEST_UTIL.emptyMockedGameDatas();
+    //   mockedGameDatas
+    //     .addCard(0, 0, 1)
+    //     .addCard(0, 2, 'A')
+    //     .addCard(0, 3, 1);
+    //   var mockedResult = mockedGameDatas.getResult();
+    //   var mockedCandidateCards = [1, 1];
+    //   var gameDatas = GAME_SYSTEM.getGameDatasByToken(TOKEN);
+    //   gameDatas.numberCardsMap = mockedResult.numberCardsMap;
+    //   gameDatas.charCardsMap = mockedResult.charCardsMap;
+    //   gameDatas.emptyCardsMap = mockedResult.emptyCardsMap;
+    //   gameDatas.playgroundCards = mockedResult.playgroundCards;
+    //   gameDatas.candidateCards = mockedCandidateCards;
+
+    //   clientSocket.emit(CLICK_CARD, 0, 1, () => {
+    //     clientSocket.emit(CLICK_CARD, 0, 3, () => {
+    //       clientSocket.emit(CLICK_CARD, 0, 2, () => {
+    //         var expectedGameDatas = TEST_UTIL.emptyMockedGameDatas();
+    //         expectedGameDatas.addCard(0, 1, 2).addCard(0, 3, 1);
+    //         expectedGameDatas.score = 1;
+    //         var expectedResult = expectedGameDatas.getResult();
+
+    //         var resultGameDatas = TEST_UTIL.getResultGameDatas(gameDatas);
+
+    //         expectedResult.numberCardsMap.should.be.deepEqual(resultGameDatas.numberCardsMap);
+    //         resultGameDatas.charCardsMap.has('0/2').should.be.false();
+    //         expectedResult.score.should.be.deepEqual(resultGameDatas.score);
+    //         done();
+    //         debugInfor(`END TEST: ${title}`);
+    //       });
+    //     });
+    //   });
+    // });
   });
 
   describe('Crits Score And Number Attack Skills', function() {
