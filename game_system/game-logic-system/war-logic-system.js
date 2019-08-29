@@ -54,7 +54,7 @@ function executeNeedResponsedSkills(gameDatas, clickedCard) {
     return;
   }
 
-  const skills = gameDatas.combinedSkills;
+  const skills = Array.from(gameDatas.combinedSkills);
   recordInfor(`game combined skills length is:${skills.length} are:`);
   recordObject(skills);
 
@@ -68,8 +68,34 @@ function executeNeedResponsedSkills(gameDatas, clickedCard) {
       gameDatas.combinedSkills.unshift(skill);
       break;
     }
+
+    skills.shift();
+    if (hasSkillsChanged(skills, gameDatas.combinedSkills)) {
+      recordInfor('skill list has changed, end current skill loop');
+      break;
+    }
   }
   recordInfor('end response skill');
+}
+
+function hasSkillsChanged(oldSkills, newSkills) {
+  if (oldSkills.length != newSkills.length) {
+    return true;
+  }
+
+  for (let index = 0; index < oldSkills.length; index++) {
+    const oldElement = oldSkills[index];
+    const newElement = newSkills[index];
+    if (oldElement instanceof Array && newElement instanceof Array) {
+      if (!oldElement.equals(newElement)) {
+        return true;
+      }
+    } else if (oldElement != newElement) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function canGenerateRandomCharCard(emptyCardsMap, numberCardsMap) {

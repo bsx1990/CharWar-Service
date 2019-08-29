@@ -56,13 +56,17 @@ function clickCard(socket, rowIndex, columnIndex) {
 }
 
 function combineCardsWithReceivedCard(gameDatas, receivedCard) {
+  recordInfor(`begin combineCardsWithReceivedCard for token:${gameDatas.token} receivedCard:`);
+  recordObject(receivedCard);
   const gameMode = GAME_SYSTEM.getGameModeByToken(gameDatas.token);
   const logicHandler = getLogicHandler(gameMode);
   if (logicHandler == null) {
+    recordError('end combineCardsWithReceivedCard, logicHandler is null.');
     return;
   }
 
   logicHandler.combineCardsWithReceivedCard(gameDatas, receivedCard);
+  recordInfor(`end combineCardsWithReceivedCard for token:${gameDatas.token}`);
 }
 
 function getLogicHandler(gameMode) {
