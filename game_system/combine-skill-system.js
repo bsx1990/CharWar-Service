@@ -199,6 +199,34 @@ const numberAttack2TimesSkill = {
   blockList: [numberAttackSkill, absolutelyAttackSkill]
 };
 
+const absolutelyAttack2TimesSkill = {
+  name: SKILL_NAMES.absolutelyAttack2TimesSkill,
+  type: SKILL_TYPE.needResponse,
+  priority: SKILL_PRIORITY.normal,
+  canExecute: (combinedInfor, gameDatas) => {
+    return combinedInfor.totalCountOfCards > 2 && combinedInfor.maxCountOfSingleCombined > 1 && gameDatas.charCardsMap.size > 0;
+  },
+  execute: (clickedCard, gameDatas) => {
+    recordInfor('begin absolutely attack 2 times skill execute');
+    gameDatas.gameState = '';
+
+    if (GAME_SYSTEM.isNumberCard(clickedCard)) {
+      clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+      GAME_SYSTEM.combineCardsWithReceivedCard(gameDatas, clickedCard);
+    } else {
+      clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+      clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+      GAME_SYSTEM.setCard(gameDatas, clickedCard);
+      GAME_SYSTEM.emitGameDatas(gameDatas);
+      GAME_SYSTEM.checkGameStatusAfterCombined(gameDatas);
+    }
+
+    recordInfor('end absolutely attack 2 times skill execute');
+    return true;
+  },
+  blockList: [numberAttackSkill, absolutelyAttackSkill, numberAttack2TimesSkill]
+};
+
 const ALL_SKILLS = [
   critsScoreSkill,
   critsScore3TimesSkill,
@@ -209,7 +237,8 @@ const ALL_SKILLS = [
   killAllSkill,
   pentacleGrowingSkill,
   absolutelyAttackSkill,
-  numberAttack2TimesSkill
+  numberAttack2TimesSkill,
+  absolutelyAttack2TimesSkill
 ];
 const PRIORITY_SKILLS = splitAllSkillsIntoDifferentPriority(ALL_SKILLS);
 
