@@ -227,6 +227,39 @@ const absolutelyAttack2TimesSkill = {
   blockList: [numberAttackSkill, absolutelyAttackSkill, numberAttack2TimesSkill]
 };
 
+const numberAttack3TimesSkill = {
+  name: SKILL_NAMES.numberAttack3TimesSkill,
+  type: SKILL_TYPE.needResponse,
+  priority: SKILL_PRIORITY.normal,
+  canExecute: (combinedInfor, gameDatas) => {
+    return combinedInfor.totalCountOfCards > 3 && gameDatas.charCardsMap.size > 0;
+  },
+  execute: (clickedCard, gameDatas) => {
+    recordInfor('begin number attack 3 times skill execute');
+
+    if (GAME_SYSTEM.isNumberCard(clickedCard)) {
+      recordInfor('number attack 3 times skill execute exit, current clicked card is number card');
+      return false;
+    }
+
+    clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+    if (clickedCard.value != null) {
+      clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+    }
+    if (clickedCard.value != null) {
+      clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+    }
+
+    GAME_SYSTEM.setCard(gameDatas, clickedCard);
+    gameDatas.gameState = '';
+    GAME_SYSTEM.emitGameDatas(gameDatas);
+    GAME_SYSTEM.checkGameStatusAfterCombined(gameDatas);
+    recordInfor('end number attack 3 times skill execute');
+    return true;
+  },
+  blockList: [numberAttackSkill, absolutelyAttackSkill, numberAttack2TimesSkill, absolutelyAttack2TimesSkill]
+};
+
 const ALL_SKILLS = [
   critsScoreSkill,
   critsScore3TimesSkill,
@@ -238,7 +271,8 @@ const ALL_SKILLS = [
   pentacleGrowingSkill,
   absolutelyAttackSkill,
   numberAttack2TimesSkill,
-  absolutelyAttack2TimesSkill
+  absolutelyAttack2TimesSkill,
+  numberAttack3TimesSkill
 ];
 const PRIORITY_SKILLS = splitAllSkillsIntoDifferentPriority(ALL_SKILLS);
 
