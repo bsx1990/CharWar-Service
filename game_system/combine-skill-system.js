@@ -215,7 +215,10 @@ const absolutelyAttack2TimesSkill = {
       GAME_SYSTEM.combineCardsWithReceivedCard(gameDatas, clickedCard);
     } else {
       clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
-      clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+      if (clickedCard.value != null) {
+        clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+      }
+
       GAME_SYSTEM.setCard(gameDatas, clickedCard);
       GAME_SYSTEM.emitGameDatas(gameDatas);
       GAME_SYSTEM.checkGameStatusAfterCombined(gameDatas);
@@ -260,6 +263,40 @@ const numberAttack3TimesSkill = {
   blockList: [numberAttackSkill, absolutelyAttackSkill, numberAttack2TimesSkill, absolutelyAttack2TimesSkill]
 };
 
+const absolutelyAttack3TimesSkill = {
+  name: SKILL_NAMES.absolutelyAttack2TimesSkill,
+  type: SKILL_TYPE.needResponse,
+  priority: SKILL_PRIORITY.normal,
+  canExecute: (combinedInfor, gameDatas) => {
+    return combinedInfor.totalCountOfCards > 3 && combinedInfor.maxCountOfSingleCombined > 1 && gameDatas.charCardsMap.size > 0;
+  },
+  execute: (clickedCard, gameDatas) => {
+    recordInfor('begin absolutely attack 3 times skill execute');
+    gameDatas.gameState = '';
+
+    if (GAME_SYSTEM.isNumberCard(clickedCard)) {
+      clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+      GAME_SYSTEM.combineCardsWithReceivedCard(gameDatas, clickedCard);
+    } else {
+      clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+      if (clickedCard.value != null) {
+        clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+      }
+      if (clickedCard.value != null) {
+        clickedCard = GAME_SYSTEM.decreaseCard(clickedCard);
+      }
+
+      GAME_SYSTEM.setCard(gameDatas, clickedCard);
+      GAME_SYSTEM.emitGameDatas(gameDatas);
+      GAME_SYSTEM.checkGameStatusAfterCombined(gameDatas);
+    }
+
+    recordInfor('end absolutely attack 3 times skill execute');
+    return true;
+  },
+  blockList: [numberAttackSkill, absolutelyAttackSkill, numberAttack2TimesSkill, absolutelyAttack2TimesSkill, numberAttack3TimesSkill]
+};
+
 const ALL_SKILLS = [
   critsScoreSkill,
   critsScore3TimesSkill,
@@ -272,7 +309,8 @@ const ALL_SKILLS = [
   absolutelyAttackSkill,
   numberAttack2TimesSkill,
   absolutelyAttack2TimesSkill,
-  numberAttack3TimesSkill
+  numberAttack3TimesSkill,
+  absolutelyAttack3TimesSkill
 ];
 const PRIORITY_SKILLS = splitAllSkillsIntoDifferentPriority(ALL_SKILLS);
 
