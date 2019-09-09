@@ -38,6 +38,11 @@ function clickCard(socket, rowIndex, columnIndex) {
   const gameMode = GAME_SYSTEM.getGameModeByToken(token);
   const gameDatas = GAME_SYSTEM.getGameDatasByToken(token);
 
+  if (gameDatas == null) {
+    recordError(`gameDatas is null, token:${token}, gameMode:${gameMode}`);
+    return;
+  }
+
   const logicHandler = getLogicHandler(gameMode);
   if (logicHandler == null) {
     return;
